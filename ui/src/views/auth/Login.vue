@@ -310,6 +310,8 @@ export default {
           })
           this.form.idp = this.idps[0].id || ''
         }
+      }).catch(() => {
+        this.idps = []
       })
       getAPI('listOauthProvider', {}).then(response => {
         if (response) {
@@ -328,6 +330,8 @@ export default {
           })
           this.socialLogin = this.googleprovider || this.githubprovider
         }
+      }).catch(() => {
+        this.socialLogin = false
       })
       postAPI('forgotPassword', {}).then(response => {
         this.forgotPasswordEnabled = response.forgotpasswordresponse.enabled

@@ -30,6 +30,27 @@ const service = axios.create({
   timeout: 600000
 })
 
+function getCommandFromRequestConfig (config) {
+  if (!config) {
+    return null
+  }
+  if (config.params && config.params.command) {
+    return config.params.command
+  }
+  if (config.data instanceof URLSearchParams && config.data.has('command')) {
+    return config.data.get('command')
+  }
+  return null
+}
+
+function shouldSuppressUnauthorizedNotification (config) {
+  const command = getCommandFromRequestConfig(config)
+  if (!command) {
+    return false
+  }
+  return ['forgotPassword', 'listIdps', 'cloudianIsEnabled', 'listOauthProvider'].includes(command)
+}
+
 const err = (error) => {
   const response = error.response
   let countNotify = store.getters.countNotify
@@ -51,7 +72,7 @@ const err = (error) => {
       })
     }
     if (response.status === 401) {
-      if (response.config && response.config.params && ['forgotPassword', 'listIdps', 'cloudianIsEnabled'].includes(response.config.params.command)) {
+      if (shouldSuppressUnauthorizedNotification(response.config)) {
         return
       }
       const originalPath = router.currentRoute.value.path
