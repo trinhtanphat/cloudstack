@@ -1,0 +1,36 @@
+# Stage 1: Build CloudStack WAR
+FROM maven:3.6.3-openjdk-17 AS builder
+
+WORKDIR /build
+
+# Copy entire CloudStack source
+COPY . .
+
+# Build client module to WAR
+RUN mvn -f client/pom.xml package -DskipTests -q
+
+# Extract WAR filename to ensure we get the right one
+RUN ls -la client/target/
+
+# Stage 2: Runtime with Tomcat
+FROM tomcat:9-jdk17-openjdk
+
+# Install required packages
+RUN apt-get update && apt-get install -y \
+    wget curl vim \
+    && rm -rf /var/lib/apt/lists/*
+
+# Copy WAR from builder stage
+COPY --from=builder /build/client/target/client.war /usr/local/tomcat/webapps/ROOT.war
+
+# Create CloudStack config directory
+RUN mkdir -p /opt/cloudstack/conf
+
+# Expose port
+EXPOSE 8080
+
+# Health check (wait for Spring context, retry often)
+HEALTHCHECK --interval=15s --timeout=5s --start-period=60s --retries=5 \
+    CMD curl -f http://localhost:8080/ || exit 1
+
+CMD ["catalina.sh", "run"]

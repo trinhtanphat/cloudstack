@@ -35,7 +35,14 @@
         <property name="order" value="100" />
         <property name="ignoreResourceNotFound" value="true" />
         <property name="ignoreUnresolvablePlaceholders" value="true" />
-        <property name="locations" ref="DefaultConfigResources" />
+        <property name="locations">
+            <list>
+                <value>file:/opt/cloudstack/conf/db.properties</value>
+                <value>file:/opt/cloudstack/conf/environment.properties</value>
+                <value>classpath:db.properties</value>
+                <value>classpath:environment.properties</value>
+            </list>
+        </property>
     </bean>
 
 </beans>
