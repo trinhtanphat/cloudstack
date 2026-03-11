@@ -1,0 +1,16 @@
+[Unit]
+Description=CloudStack stale mshost cleanup
+After=network-online.target docker.service
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+WorkingDirectory=/root/cloudstack
+Environment=DB_CONTAINER=xiaozhi-esp32-server-db
+Environment=DB_NAME=cloud
+Environment=DB_USER=cloud
+Environment=DB_PASS=cloud
+Environment=RUN_ONCE=1
+ExecStart=/root/cloudstack/scripts/vnso/cleanup-mshost-stale.sh
+User=root
+Group=root

@@ -1,0 +1,11 @@
+[Unit]
+Description=Run CloudStack stale mshost cleanup periodically
+
+[Timer]
+OnBootSec=3min
+OnUnitActiveSec=15min
+Persistent=true
+Unit=cloudstack-mshost-cleanup.service
+
+[Install]
+WantedBy=timers.target
