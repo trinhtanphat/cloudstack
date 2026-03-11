@@ -51,11 +51,15 @@ function shouldSuppressUnauthorizedNotification (config) {
   return ['forgotPassword', 'listIdps', 'cloudianIsEnabled', 'listOauthProvider'].includes(command)
 }
 
+function isLoginRoute () {
+  return router.currentRoute.value.path === '/user/login'
+}
+
 const err = (error) => {
   const response = error.response
+  const requestConfig = response?.config || error.config
   let countNotify = store.getters.countNotify
   if (response) {
-    console.log(response)
     if (response.status === 403) {
       const data = response.data
       countNotify++
@@ -72,10 +76,10 @@ const err = (error) => {
       })
     }
     if (response.status === 401) {
-      if (shouldSuppressUnauthorizedNotification(response.config)) {
-        return
-      }
       const originalPath = router.currentRoute.value.path
+      if (shouldSuppressUnauthorizedNotification(requestConfig) || isLoginRoute()) {
+        return Promise.reject(error)
+      }
       for (const key in response.data) {
         if (key.includes('response')) {
           if (response.data[key].errortext.includes('not available for user')) {
@@ -131,6 +135,9 @@ const err = (error) => {
           router.push({ path: '/user/login', query: { redirect: originalPath } })
         }
       })
+    }
+    if (response.status === 431 && isLoginRoute()) {
+      return Promise.reject(error)
     }
     if (response.status === 404) {
       countNotify++

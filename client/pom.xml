@@ -781,10 +781,10 @@
                                     </fileset>
                                 </copy>
                                 <copy todir="${project.build.directory}/classes/META-INF/webapp">
-                                    <fileset dir="${basedir}/../ui">
-                                        <include name="index.html"/>
-                                        <include name="legacy/**"/>
-                                    </fileset>
+                                    <fileset dir="${basedir}/../ui/dist" />
+                                </copy>
+                                <copy todir="${project.build.directory}/classes/META-INF/webapp/legacy">
+                                    <fileset dir="${basedir}/../ui/legacy" erroronmissingdir="false" />
                                 </copy>
                                 <copy overwrite="true" todir="${basedir}/target/utilities/bin">
                                     <fileset dir="${basedir}/../setup/bindir">
