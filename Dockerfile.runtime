@@ -1,0 +1,20 @@
+FROM eclipse-temurin:17-jre
+
+# CloudStack startup needs ssh-keygen to generate system VM keypairs on first run.
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends openssh-client bash ca-certificates tzdata ipmitool iproute2 \
+    && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /opt/cloudstack
+
+# Ensure SSH directory exists for management-server keypair generation.
+RUN mkdir -p /root/.ssh && chmod 700 /root/.ssh
+
+# CloudStack expects a few host-style utilities and extension entrypoints even in a containerized single-node setup.
+RUN mkdir -p /opt/cloudstack/extensions/Proxmox /opt/cloudstack/extensions/HyperV /opt/cloudstack/extensions/MaaS \
+    && printf '#!/bin/sh\necho "Proxmox extension placeholder in container runtime"\n' > /opt/cloudstack/extensions/Proxmox/proxmox.sh \
+    && printf '#!/usr/bin/env python3\nprint("HyperV extension placeholder in container runtime")\n' > /opt/cloudstack/extensions/HyperV/hyperv.py \
+    && printf '#!/usr/bin/env python3\nprint("MaaS extension placeholder in container runtime")\n' > /opt/cloudstack/extensions/MaaS/maas.py \
+    && chmod +x /opt/cloudstack/extensions/Proxmox/proxmox.sh /opt/cloudstack/extensions/HyperV/hyperv.py /opt/cloudstack/extensions/MaaS/maas.py \
+    && printf '#!/bin/sh\nif [ "$1" = "status" ]; then\n  echo "  Loaded: not-found (container runtime without systemd)"\n  exit 0\nfi\necho "systemctl shim: unsupported action $1" >&2\nexit 0\n' > /usr/local/bin/systemctl \
+    && chmod +x /usr/local/bin/systemctl
