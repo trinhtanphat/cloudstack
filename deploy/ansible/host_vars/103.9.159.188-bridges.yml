@@ -1,0 +1,56 @@
+# Network bridge configuration for KVM host 103.9.159.188
+# Auto-discovered: eno2 is UP (public/management), eno1 is DOWN
+
+network_manage_bridges: true
+
+# Management Network Configuration
+management_interface: eno2
+management_address_cidr: 10.10.10.23/24
+management_gateway4: 10.10.10.1
+management_nameservers: 
+  - 8.8.8.8
+  - 8.8.4.4
+
+# Bridge Configuration for CloudStack
+bridges:
+  br-mgmt:
+    # Management bridge carries:
+    # - CloudStack management traffic
+    # - Internal system VM communication
+    interface: eno2
+    addresses:
+      - "10.10.10.23/24"
+    gateway4: 10.10.10.1
+    dhcp4: false
+    nameservers:
+      - 8.8.8.8
+      - 8.8.4.4
+
+  br-guest:
+    # Guest bridge carries:
+    # - VM network traffic
+    # - VM-to-VM communication
+    # Note: Using eno2 (single NIC) with bridge separation
+    interface: eno2
+    vlan: 30
+    addresses:
+      - "10.20.0.3/24"
+    dhcp4: false
+    dhcp4_overrides:
+      use_dns: false
+
+  br-storage:
+    # Storage bridge carries:
+    # - Primary/Secondary storage NFS mounts
+    # - VM disk image I/O
+    interface: eno2
+    vlan: 20
+    addresses:
+      - "10.10.20.23/24"
+    dhcp4: false
+    dhcp4_overrides:
+      use_dns: false
+
+# Public IP Assignment (if needed for external access)
+public_interface: eno2
+public_address: 103.9.159.188

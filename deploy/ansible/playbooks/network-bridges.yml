@@ -1,0 +1,49 @@
+---
+- name: Configure bridge networking on KVM hosts
+  hosts: kvm
+  become: true
+  tasks:
+    - name: Validate bridge management is explicitly enabled
+      ansible.builtin.assert:
+        that:
+          - network_manage_bridges | default(false) | bool
+          - management_interface is defined
+          - guest_trunk_interface is defined
+          - management_bridge is defined
+          - guest_bridge is defined
+          - management_address_cidr is defined
+          - management_gateway4 is defined
+          - management_nameservers is defined
+        fail_msg: >-
+          Missing host_vars for this host. Copy host_vars.example.yml into host_vars/<ip>.yml
+          and fill in the NIC names and management IP settings first.
+
+    - name: Backup current netplan files
+      ansible.builtin.shell: |
+        set -e
+        mkdir -p /root/netplan-backup
+        cp -a /etc/netplan/*.yaml /root/netplan-backup/ 2>/dev/null || true
+      changed_when: true
+
+    - name: Deploy bridge netplan config
+      ansible.builtin.template:
+        src: ../templates/netplan-bridges.yaml.j2
+        dest: /etc/netplan/60-cloudstack-bridges.yaml
+        mode: "0600"
+
+    - name: Validate netplan syntax
+      ansible.builtin.command: netplan generate
+      changed_when: false
+
+    - name: Apply netplan
+      ansible.builtin.command: netplan apply
+      changed_when: true
+
+    - name: Show resulting links
+      ansible.builtin.command: ip -br a
+      register: ip_br_result
+      changed_when: false
+
+    - name: Print resulting links
+      ansible.builtin.debug:
+        var: ip_br_result.stdout_lines

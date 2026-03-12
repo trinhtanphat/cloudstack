@@ -1,0 +1,19 @@
+cloudstack_domain: cloudstack.vnso.vn
+management_private_ip: 103.9.157.6
+secondary_storage_path: /export/secondary
+nfs_export_cidr: 10.10.0.0/16
+
+# Set to true only if you need libvirt TCP listener.
+libvirt_tcp: false
+
+# Public endpoint for users
+public_endpoint_ip: 103.9.157.6
+
+# Reverse proxy setup on management host.
+# Keep disabled by default when port 80/443 are already used by another service.
+management_setup_nginx: false
+
+# Nginx TLS settings
+nginx_tls_enabled: false
+nginx_ssl_certificate: /etc/nginx/ssl/cert.crt
+nginx_ssl_certificate_key: /etc/nginx/ssl/cert.key

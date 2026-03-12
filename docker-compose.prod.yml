@@ -14,6 +14,7 @@ services:
       JAVA_TOOL_OPTIONS: "--add-opens=java.base/java.lang=ALL-UNNAMED -Xms512m -Xmx2048m -Dlog4j.configurationFile=/opt/cloudstack/conf/log4j-cloud.xml"
     ports:
       - "0.0.0.0:28080:28080"
+      - "0.0.0.0:8250:8250"
     volumes:
       - ./client/target/cloud-client-ui-4.23.0.0-SNAPSHOT.jar:/opt/cloudstack/cloud-client-ui.jar:ro
       - ./client/target/lib:/opt/cloudstack/lib:ro
