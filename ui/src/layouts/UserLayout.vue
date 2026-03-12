@@ -23,6 +23,9 @@
       size="small"
       class="button-clear-notification"
       @click="onClearNotification">{{ $t('label.clear.notification') }}</a-button>
+    <div class="theme-toggle-container">
+      <theme-mode-toggle />
+    </div>
     <div class="user-layout-container">
       <div class="user-layout-header">
         <img
@@ -46,26 +49,22 @@
 
 <script>
 import RouteView from '@/layouts/RouteView'
+import ThemeModeToggle from '@/components/widgets/ThemeModeToggle.vue'
 import { mixinDevice } from '@/utils/mixin.js'
 import notification from 'ant-design-vue/es/notification'
+import { applyThemeMode, getSavedThemeMode, watchSystemTheme } from '@/utils/themeMode'
 
 export default {
   name: 'UserLayout',
-  components: { RouteView },
+  components: { RouteView, ThemeModeToggle },
   mixins: [mixinDevice],
   data () {
     return {
-      showClear: false
+      showClear: false,
+      cleanupSystemWatcher: null
     }
   },
   watch: {
-    '$store.getters.darkMode' (darkMode) {
-      if (darkMode) {
-        document.body.classList.add('dark-mode')
-      } else {
-        document.body.classList.remove('dark-mode')
-      }
-    },
     '$store.getters.countNotify' (countNotify) {
       this.showClear = false
       if (countNotify && countNotify > 0) {
@@ -75,11 +74,14 @@ export default {
   },
   mounted () {
     document.body.classList.add('userLayout')
-    const layoutMode = this.$config.theme['@layout-mode'] || 'light'
-    this.$store.dispatch('SetDarkMode', (layoutMode === 'dark'))
-    if (layoutMode === 'dark') {
-      document.body.classList.add('dark-mode')
+
+    const themeMode = applyThemeMode(getSavedThemeMode(this.$config), this.$store, this.$config)
+    if (themeMode === 'system') {
+      this.cleanupSystemWatcher = watchSystemTheme(() => {
+        applyThemeMode('system', this.$store, this.$config)
+      })
     }
+
     const countNotify = this.$store.getters.countNotify
     this.showClear = false
     if (countNotify && countNotify > 0) {
@@ -87,6 +89,11 @@ export default {
     }
   },
   beforeUnmount () {
+    if (this.cleanupSystemWatcher) {
+      this.cleanupSystemWatcher()
+      this.cleanupSystemWatcher = null
+    }
+
     document.body.classList.remove('userLayout')
     document.body.classList.remove('dark-mode')
   },
@@ -100,6 +107,13 @@ export default {
 </script>
 
 <style lang="less" scoped>
+.theme-toggle-container {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  z-index: 10;
+}
+
 .user-layout {
   height: 100%;
 

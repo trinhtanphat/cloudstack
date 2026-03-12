@@ -67,8 +67,24 @@ export default {
   created () {
     this.fetchData()
   },
+  watch: {
+    '$store.getters.userInfo.id' (userId) {
+      if (userId && !this.showSwitcher) {
+        this.fetchData()
+      }
+    }
+  },
   methods: {
     fetchData () {
+      const userInfo = store.getters.userInfo
+      const apis = store.getters.apis || {}
+      const hasSamlSwitchApi = Object.prototype.hasOwnProperty.call(apis, 'listAndSwitchSamlAccount') || Object.prototype.hasOwnProperty.call(apis, 'listandswitchsamlaccount')
+      const sessionReady = Boolean(store.getters.token && userInfo && userInfo.id)
+      if (!sessionReady || !hasSamlSwitchApi || this.loading) {
+        this.showSwitcher = false
+        return
+      }
+
       var page = 1
       const samlAccounts = []
       const getNextPage = () => {
@@ -82,19 +98,25 @@ export default {
             getNextPage()
           }
         }).catch(error => {
-          console.log(error)
+          const errorCode = error?.response?.data?.errorresponse?.errorcode
+          if (errorCode === 432) {
+            this.showSwitcher = false
+          } else {
+            console.log(error)
+          }
         }).finally(() => {
+          this.loading = false
           if (samlAccounts.length < 2) {
             this.showSwitcher = false
             return
           }
-          this.samlAccounts = samlAccounts
           this.samlAccounts = _.orderBy(samlAccounts, ['domainPath'], ['asc'])
-          const currentAccount = this.samlAccounts.filter(x => {
-            return x.userId === store.getters.userInfo.id
-          })[0]
+          const currentAccount = this.samlAccounts.find(x => x.userId === store.getters.userInfo.id)
+          if (!currentAccount) {
+            this.showSwitcher = false
+            return
+          }
           this.currentAccount = `${currentAccount.accountName} (${currentAccount.domainName})`
-          this.loading = false
           this.showSwitcher = true
         })
       }
@@ -110,7 +132,7 @@ export default {
           this.$message.success(`Switched to "${account.accountName} (${account.domainPath})"`)
           this.$router.go()
         })
-      }).else(error => {
+      }).catch(error => {
         console.log('error refreshing with new user context: ' + error)
       })
     }

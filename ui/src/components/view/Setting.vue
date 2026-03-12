@@ -129,6 +129,7 @@
 
 <script>
 import SettingItem from '@/components/view/SettingItem'
+import { applyThemeMode, getSavedThemeMode } from '@/utils/themeMode'
 
 export default {
   name: 'Setting',
@@ -143,7 +144,7 @@ export default {
   },
   data () {
     return {
-      layoutMode: this.$config.theme['@layout-mode'] || 'light',
+      layoutMode: getSavedThemeMode(this.$config),
       colorPick: this.$config.theme['@primary-color'],
       navBgColorPick: this.$config.theme['@navigation-background-color'],
       navTextColorPick: this.$config.theme['@navigation-text-color'],
@@ -168,6 +169,11 @@ export default {
           name: 'dark',
           type: 'image-checkbox',
           icon: 'dark'
+        },
+        {
+          name: 'system',
+          type: 'image-checkbox',
+          icon: 'light'
         }
       ]
       return arrStyle
@@ -229,11 +235,11 @@ export default {
   methods: {
     fetchData () {
       this.originalSetting = Object.assign({}, this.$config.theme)
-      this.layoutMode = this.$config.theme['@layout-mode'] || 'light'
+      this.layoutMode = getSavedThemeMode(this.$config)
       this.uiSettings = this.$config.theme
     },
     switchLayoutMode () {
-      this.$store.dispatch('SetDarkMode', (this.layoutMode === 'dark'))
+      this.layoutMode = applyThemeMode(this.layoutMode, this.$store, this.$config)
       this.updateSetting('@layout-mode', this.layoutMode)
     },
     switchColor (e) {
