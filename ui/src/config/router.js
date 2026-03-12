@@ -43,6 +43,7 @@ import customaction from '@/config/section/extension/customaction'
 import tools from '@/config/section/tools'
 import quota from '@/config/section/plugin/quota'
 import cloudian from '@/config/section/plugin/cloudian'
+import gcp from '@/config/section/gcp'
 
 function generateRouterMap (section) {
   var map = {
@@ -233,6 +234,7 @@ export function asyncRouterMap () {
       generateRouterMap(tools),
       generateRouterMap(quota),
       generateRouterMap(cloudian),
+      generateRouterMap(gcp),
       {
         path: '/exception',
         name: 'exception',
