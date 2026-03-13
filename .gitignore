@@ -79,6 +79,9 @@ override/
 plugins/hypervisors/kvm/.pydevproject
 plugins/network-elements/juniper-contrail/logs/
 replace.properties.override
+docker/secrets/*.env
+docker/secrets/*.json
+!docker/secrets/.gitkeep
 replace.properties.tmp
 scripts/.pydevproject
 scripts/vm/hypervisor/xenserver/vhd-util
@@ -98,6 +101,8 @@ tools/marvin/marvin/cloudstackAPI/
 tools/marvin/marvin/cloudstackAPI/*
 unittest
 venv
+.venv/
+deploy/ansible/.venv/
 waf-*
 
 # this ignores _all files starting with '.'. Don't do that!

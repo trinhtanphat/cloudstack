@@ -35,6 +35,7 @@ import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Enumeration;
 import java.util.Formatter;
 import java.util.Iterator;
 import java.util.List;
@@ -288,10 +289,9 @@ public class NetUtils {
             return addrs;
         }
 
-        NetworkInterface nic = null;
-        try {
-            nic = NetworkInterface.getByName(pubNic);
-        } catch (final SocketException e) {
+        final NetworkInterface nic = getNetworkInterface(pubNic);
+        if (nic == null) {
+            LOGGER.warn(String.format("Unable to retrieve default NIC [%s] while gathering default NIC IPs.", pubNic));
             return addrs;
         }
 
@@ -303,10 +303,28 @@ public class NetUtils {
 
     public static String getDefaultEthDevice() {
         if (SystemUtils.IS_OS_MAC) {
-            final String defDev = Script.runSimpleBashScript("/sbin/route -n get default 2> /dev/null | grep interface | awk '{print $2}'");
+            final String defDev = StringUtils.trimToNull(Script.runSimpleBashScript("/sbin/route -n get default 2> /dev/null | grep interface | awk '{print $2}'"));
             return defDev;
         }
-        return Script.runSimpleBashScript("ip route show default 0.0.0.0/0 | head -1 | awk '{print $5}'");
+
+        final String defDev = StringUtils.trimToNull(Script.runSimpleBashScript("ip route show default 0.0.0.0/0 | head -1 | awk '{print $5}'"));
+        if (defDev != null) {
+            return defDev;
+        }
+
+        try {
+            final Enumeration<NetworkInterface> nics = NetworkInterface.getNetworkInterfaces();
+            while (nics != null && nics.hasMoreElements()) {
+                final NetworkInterface nic = nics.nextElement();
+                if (nic == null || !nic.isUp() || nic.isLoopback() || nic.isVirtual()) {
+                    continue;
+                }
+                return nic.getName();
+            }
+        } catch (final SocketException e) {
+            LOGGER.warn("Unable to determine a default NIC from available interfaces.", e);
+        }
+        return null;
     }
 
     public static String getLocalIPString() {

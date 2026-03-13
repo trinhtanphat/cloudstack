@@ -208,11 +208,12 @@
 
 <script>
 import { ref, reactive, toRaw } from 'vue'
+import Cookies from 'js-cookie'
 import { getAPI, postAPI } from '@/api'
 import store from '@/store'
 import { mapActions } from 'vuex'
 import { sourceToken } from '@/utils/request'
-import { SERVER_MANAGER } from '@/store/mutation-types'
+import { ACCESS_TOKEN, SERVER_MANAGER } from '@/store/mutation-types'
 import TranslationMenu from '@/components/header/TranslationMenu'
 
 export default {
@@ -268,7 +269,7 @@ export default {
       this.form = reactive({
         server: (this.server.apiHost || '') + this.server.apiBase,
         username: this.$route.query?.username || '',
-        domain: this.$route.query?.domain || '',
+        domain: this.$route.query?.domain || '/',
         project: null
       })
       this.rules = reactive({})
@@ -300,6 +301,20 @@ export default {
       }
     },
     fetchData () {
+      const hasExistingSession = !!(
+        this.$localStorage.get(ACCESS_TOKEN) ||
+        Cookies.get('sessionkey') ||
+        Cookies.get('userid') ||
+        Cookies.get('userid', { path: '/client' })
+      )
+
+      if (!hasExistingSession) {
+        this.idps = []
+        this.socialLogin = false
+        this.forgotPasswordEnabled = false
+        return
+      }
+
       getAPI('listIdps').then(response => {
         if (response) {
           this.idps = response.listidpsresponse.idp || []
@@ -310,6 +325,8 @@ export default {
           })
           this.form.idp = this.idps[0].id || ''
         }
+      }).catch(() => {
+        this.idps = []
       })
       getAPI('listOauthProvider', {}).then(response => {
         if (response) {
@@ -328,6 +345,8 @@ export default {
           })
           this.socialLogin = this.googleprovider || this.githubprovider
         }
+      }).catch(() => {
+        this.socialLogin = false
       })
       postAPI('forgotPassword', {}).then(response => {
         this.forgotPasswordEnabled = response.forgotpasswordresponse.enabled

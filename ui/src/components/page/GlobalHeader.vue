@@ -27,7 +27,7 @@
         <menu-fold-outlined class="trigger" v-else @click="toggle" />
       </template>
       <project-menu />
-      <saml-domain-switcher style="margin-left: 20px" />
+      <theme-mode-toggle class="header-theme-mode" />
       <user-menu :device="device"></user-menu>
     </div>
     <div v-else :class="['top-nav-header-index', theme]">
@@ -46,7 +46,7 @@
           </div>
         </div>
         <project-menu />
-        <saml-domain-switcher style="margin-left: 20px" />
+        <theme-mode-toggle class="header-theme-mode" />
         <user-menu></user-menu>
       </div>
     </div>
@@ -58,8 +58,8 @@
 import Logo from '../header/Logo'
 import SMenu from '../menu/'
 import ProjectMenu from '../header/ProjectMenu'
-import SamlDomainSwitcher from '../header/SamlDomainSwitcher'
 import UserMenu from '../header/UserMenu'
+import ThemeModeToggle from '@/components/widgets/ThemeModeToggle.vue'
 
 import { mixin } from '@/utils/mixin.js'
 
@@ -69,7 +69,7 @@ export default {
     Logo,
     SMenu,
     ProjectMenu,
-    SamlDomainSwitcher,
+    ThemeModeToggle,
     UserMenu
   },
   mixins: [mixin],
@@ -137,6 +137,10 @@ export default {
   .ant-breadcrumb {
     display: inline;
     vertical-align: middle;
+  }
+
+  .header-theme-mode {
+    margin-left: 16px;
   }
 }
 </style>

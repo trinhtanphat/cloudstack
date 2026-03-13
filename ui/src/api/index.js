@@ -36,11 +36,37 @@ const additionalGetAPICommandsList = [
   'verifyoauthcodeandgetuser'
 ]
 
+function getStoredSessionKey () {
+  return vueProps.$localStorage.get(ACCESS_TOKEN) || Cookies.get('sessionkey')
+}
+
+function clearClientSessionCookies () {
+  const paths = ['/', '/client']
+  const hostname = window.location.hostname
+  const domains = [undefined, hostname, `.${hostname}`]
+
+  Object.keys(Cookies.get()).forEach(cookieName => {
+    paths.forEach(path => {
+      domains.forEach(domain => {
+        const options = { path }
+        if (domain) {
+          options.domain = domain
+        }
+        Cookies.remove(cookieName, options)
+      })
+    })
+  })
+}
+
+function hasClientSession () {
+  return !!(getStoredSessionKey() || Cookies.get('userid') || Cookies.get('userid', { path: '/client' }))
+}
+
 export function getAPI (command, args = {}) {
   args.command = command
   args.response = 'json'
 
-  const sessionkey = vueProps.$localStorage.get(ACCESS_TOKEN) || Cookies.get('sessionkey')
+  const sessionkey = getStoredSessionKey()
   if (sessionkey) {
     args.sessionkey = sessionkey
   }
@@ -66,7 +92,7 @@ export function postAPI (command, data = {}) {
     })
   }
 
-  const sessionkey = vueProps.$localStorage.get(ACCESS_TOKEN) || Cookies.get('sessionkey')
+  const sessionkey = getStoredSessionKey()
   if (sessionkey) {
     params.append('sessionkey', sessionkey)
   }
@@ -88,8 +114,24 @@ export function login (arg) {
     sourceToken.init()
   }
 
-  // Logout before login is called to purge any duplicate sessionkey cookies
-  postAPI('logout')
+  if (hasClientSession()) {
+    const sessionkey = getStoredSessionKey()
+    clearClientSessionCookies()
+    if (sessionkey) {
+      const logoutParams = new URLSearchParams()
+      logoutParams.append('command', 'logout')
+      logoutParams.append('response', 'json')
+      logoutParams.append('sessionkey', sessionkey)
+      axios({
+        url: '/',
+        method: 'POST',
+        data: logoutParams,
+        headers: {
+          'content-type': 'application/x-www-form-urlencoded'
+        }
+      }).catch(() => {})
+    }
+  }
 
   const params = new URLSearchParams()
   params.append('command', 'login')
@@ -107,8 +149,26 @@ export function login (arg) {
   })
 }
 
-export async function logout () {
-  const result = await postAPI('logout').finally(() => {
+export async function logout (sessionkey) {
+  clearClientSessionCookies()
+
+  const params = new URLSearchParams()
+  params.append('command', 'logout')
+  params.append('response', 'json')
+
+  const effectiveSessionKey = sessionkey || getStoredSessionKey()
+  if (effectiveSessionKey) {
+    params.append('sessionkey', effectiveSessionKey)
+  }
+
+  const result = await axios({
+    url: '/',
+    method: 'POST',
+    data: params,
+    headers: {
+      'content-type': 'application/x-www-form-urlencoded'
+    }
+  }).finally(() => {
     sourceToken.cancel()
     message.destroy()
     notification.destroy()
@@ -121,8 +181,24 @@ export function oauthlogin (arg) {
     sourceToken.init()
   }
 
-  // Logout before login is called to purge any duplicate sessionkey cookies
-  postAPI('logout')
+  if (hasClientSession()) {
+    const sessionkey = getStoredSessionKey()
+    clearClientSessionCookies()
+    if (sessionkey) {
+      const logoutParams = new URLSearchParams()
+      logoutParams.append('command', 'logout')
+      logoutParams.append('response', 'json')
+      logoutParams.append('sessionkey', sessionkey)
+      axios({
+        url: '/',
+        method: 'POST',
+        data: logoutParams,
+        headers: {
+          'content-type': 'application/x-www-form-urlencoded'
+        }
+      }).catch(() => {})
+    }
+  }
 
   const params = new URLSearchParams()
   params.append('command', 'oauthlogin')

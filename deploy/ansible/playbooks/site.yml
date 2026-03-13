@@ -1,0 +1,211 @@
+---
+- name: Common baseline for all hosts
+  hosts: all
+  become: true
+  tasks:
+    - name: Update apt cache
+      ansible.builtin.apt:
+        update_cache: true
+        cache_valid_time: 3600
+
+    - name: Install common packages
+      ansible.builtin.apt:
+        name:
+          - curl
+          - jq
+          - ca-certificates
+          - gnupg
+          - chrony
+        state: present
+
+    - name: Ensure chrony is running
+      ansible.builtin.service:
+        name: chrony
+        state: started
+        enabled: true
+
+- name: Configure management host
+  hosts: management
+  become: true
+  tasks:
+    - name: Check whether docker is already installed
+      ansible.builtin.command: docker --version
+      register: docker_present
+      failed_when: false
+      changed_when: false
+
+    - name: Install management dependencies except Docker
+      ansible.builtin.apt:
+        name:
+          - nfs-kernel-server
+          - ufw
+        state: present
+
+    - name: Install nginx only when reverse proxy setup is enabled
+      ansible.builtin.apt:
+        name:
+          - nginx
+        state: present
+      when: management_setup_nginx | default(false)
+
+    - name: Install Docker packages only when Docker is missing
+      ansible.builtin.apt:
+        name:
+          - docker.io
+          - docker-compose-plugin
+        state: present
+      when: docker_present.rc != 0
+
+    - name: Ensure docker is running
+      ansible.builtin.service:
+        name: docker
+        state: started
+        enabled: true
+      when: docker_present.rc == 0 or docker_present.rc != 0
+
+    - name: Create secondary storage directory
+      ansible.builtin.file:
+        path: "{{ secondary_storage_path }}"
+        state: directory
+        mode: "0775"
+        owner: nobody
+        group: nogroup
+
+    - name: Configure /etc/exports for secondary storage
+      ansible.builtin.lineinfile:
+        path: /etc/exports
+        line: "{{ secondary_storage_path }} {{ nfs_export_cidr }}(rw,sync,no_subtree_check,no_root_squash)"
+        create: true
+      notify: Reload NFS exports
+
+    - name: Ensure NFS server is running
+      ansible.builtin.service:
+        name: nfs-kernel-server
+        state: started
+        enabled: true
+
+    - name: Ensure nginx service is running
+      ansible.builtin.service:
+        name: nginx
+        state: started
+        enabled: true
+      when: management_setup_nginx | default(false)
+
+    - name: Deploy nginx config for CloudStack
+      ansible.builtin.template:
+        src: ../templates/nginx-cloudstack.conf.j2
+        dest: /etc/nginx/sites-available/cloudstack.conf
+        mode: "0644"
+      notify: Reload nginx
+      when: management_setup_nginx | default(false)
+
+    - name: Enable cloudstack nginx site
+      ansible.builtin.file:
+        src: /etc/nginx/sites-available/cloudstack.conf
+        dest: /etc/nginx/sites-enabled/cloudstack.conf
+        state: link
+      notify: Reload nginx
+      when: management_setup_nginx | default(false)
+
+    - name: Remove default nginx site if exists
+      ansible.builtin.file:
+        path: /etc/nginx/sites-enabled/default
+        state: absent
+      notify: Reload nginx
+      when: management_setup_nginx | default(false)
+
+    - name: Allow firewall SSH
+      ansible.builtin.command: ufw allow 22/tcp
+      changed_when: false
+
+    - name: Allow firewall HTTP
+      ansible.builtin.command: ufw allow 80/tcp
+      changed_when: false
+      when: management_setup_nginx | default(false)
+
+    - name: Allow firewall HTTPS
+      ansible.builtin.command: ufw allow 443/tcp
+      changed_when: false
+      when: management_setup_nginx | default(false)
+
+    - name: Allow firewall management from private CIDR
+      ansible.builtin.command: ufw allow from 10.10.0.0/16 to any port 28080 proto tcp
+      changed_when: false
+
+    - name: Enable UFW
+      ansible.builtin.command: ufw --force enable
+      changed_when: false
+
+  handlers:
+    - name: Reload NFS exports
+      ansible.builtin.command: exportfs -rav
+      changed_when: true
+
+    - name: Reload nginx
+      ansible.builtin.shell: |
+        nginx -t
+        systemctl is-active --quiet nginx || systemctl start nginx
+        systemctl reload nginx
+      changed_when: true
+
+- name: Configure KVM hosts
+  hosts: kvm
+  become: true
+  pre_tasks:
+    - name: Ensure python3 exists on remote KVM hosts
+      ansible.builtin.raw: test -x /usr/bin/python3 || (apt-get update && apt-get install -y python3)
+      changed_when: false
+  tasks:
+    - name: Install KVM packages
+      ansible.builtin.apt:
+        name:
+          - qemu-kvm
+          - libvirt-daemon-system
+          - libvirt-clients
+          - bridge-utils
+          - virtinst
+          - cpu-checker
+          - qemu-utils
+          - nfs-common
+        state: present
+
+    - name: Enable libvirtd
+      ansible.builtin.service:
+        name: libvirtd
+        state: started
+        enabled: true
+
+    - name: Ensure kernel modules config exists
+      ansible.builtin.copy:
+        dest: /etc/modules-load.d/kvm-cloudstack.conf
+        mode: "0644"
+        content: |
+          kvm
+          kvm_intel
+          br_netfilter
+
+    - name: Load kernel modules
+      ansible.builtin.shell: |
+        modprobe kvm || true
+        modprobe kvm_intel || true
+        modprobe br_netfilter || true
+      changed_when: false
+
+    - name: Configure sysctl for bridge networking
+      ansible.builtin.copy:
+        dest: /etc/sysctl.d/99-cloudstack-kvm.conf
+        mode: "0644"
+        content: |
+          net.bridge.bridge-nf-call-iptables = 1
+          net.bridge.bridge-nf-call-ip6tables = 1
+          net.ipv4.ip_forward = 1
+
+    - name: Apply sysctl
+      ansible.builtin.command: sysctl --system
+      changed_when: false
+
+    - name: Quick KVM verification
+      ansible.builtin.shell: |
+        test -e /dev/kvm
+        virsh list --all >/dev/null
+      changed_when: false

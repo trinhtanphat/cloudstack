@@ -1,0 +1,34 @@
+network:
+  version: 2
+  renderer: networkd
+  ethernets:
+    {{ management_interface }}:
+      dhcp4: false
+    {{ guest_trunk_interface }}:
+      dhcp4: false
+  bridges:
+    {{ management_bridge }}:
+      interfaces: [{{ management_interface }}]
+      dhcp4: false
+      addresses:
+        - {{ management_address_cidr }}
+      routes:
+        - to: default
+          via: {{ management_gateway4 }}
+      nameservers:
+        addresses: [{% for ns in management_nameservers %}{{ ns }}{% if not loop.last %}, {% endif %}{% endfor %}]
+      parameters:
+        stp: false
+        forward-delay: 0
+    {{ guest_bridge }}:
+      interfaces: [{{ guest_trunk_interface }}]
+      dhcp4: false
+      {% if guest_bridge_vlan_aware | default(false) %}
+      parameters:
+        stp: false
+        forward-delay: 0
+      {% else %}
+      parameters:
+        stp: false
+        forward-delay: 0
+      {% endif %}

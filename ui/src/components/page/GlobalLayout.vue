@@ -133,6 +133,7 @@ import { getAPI } from '@/api'
 import Drawer from '@/components/widgets/Drawer'
 import Setting from '@/components/view/Setting.vue'
 import AnnouncementBanner from '@/components/header/AnnouncementBanner.vue'
+import { applyThemeMode, getSavedThemeMode, watchSystemTheme } from '@/utils/themeMode'
 
 export default {
   name: 'GlobalLayout',
@@ -150,7 +151,8 @@ export default {
       collapsed: false,
       menus: [],
       showSetting: false,
-      showClear: false
+      showClear: false,
+      cleanupSystemWatcher: null
     }
   },
   computed: {
@@ -183,13 +185,6 @@ export default {
     mainMenu (newMenu) {
       this.menus = newMenu.find((item) => item.path === '/').children
     },
-    '$store.getters.darkMode' (darkMode) {
-      if (darkMode) {
-        document.body.classList.add('dark-mode')
-      } else {
-        document.body.classList.remove('dark-mode')
-      }
-    },
     '$store.getters.countNotify' (countNotify) {
       this.showClear = false
       if (countNotify && countNotify > 0) {
@@ -211,11 +206,13 @@ export default {
     }
   },
   mounted () {
-    const layoutMode = this.$config.theme['@layout-mode'] || 'light'
-    this.$store.dispatch('SetDarkMode', (layoutMode === 'dark'))
-    if (layoutMode === 'dark') {
-      document.body.classList.add('dark-mode')
+    const layoutMode = applyThemeMode(getSavedThemeMode(this.$config), this.$store, this.$config)
+    if (layoutMode === 'system') {
+      this.cleanupSystemWatcher = watchSystemTheme(() => {
+        applyThemeMode('system', this.$store, this.$config)
+      })
     }
+
     const userAgent = navigator.userAgent
     if (userAgent.indexOf('Edge') > -1) {
       this.$nextTick(() => {
@@ -232,7 +229,12 @@ export default {
     }
   },
   beforeUnmount () {
-    document.body.classList.remove('dark')
+    if (this.cleanupSystemWatcher) {
+      this.cleanupSystemWatcher()
+      this.cleanupSystemWatcher = null
+    }
+
+    document.body.classList.remove('dark-mode')
   },
   methods: {
     ...mapActions(['setSidebar']),

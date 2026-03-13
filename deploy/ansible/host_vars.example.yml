@@ -1,0 +1,17 @@
+# Copy this file into host_vars/<ip>.yml for each KVM host and edit the NIC names.
+# Example:
+#   cp host_vars.example.yml host_vars/103.9.159.151.yml
+
+network_manage_bridges: true
+management_interface: eno1
+management_bridge: br-mgmt
+management_address_cidr: 10.10.10.21/24
+management_gateway4: 10.10.10.1
+management_nameservers:
+  - 1.1.1.1
+  - 8.8.8.8
+
+guest_trunk_interface: eno2
+guest_bridge: br-guest
+# Optional VLAN-aware bridge. Set true if guest/public VLAN trunk goes through this NIC.
+guest_bridge_vlan_aware: true

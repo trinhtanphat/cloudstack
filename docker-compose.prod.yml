@@ -1,0 +1,38 @@
+services:
+  # CloudStack Management Server
+  cloudstack-mgmt:
+    build:
+      context: .
+      dockerfile: Dockerfile.runtime
+    image: cloudstack-mgmt-runtime:local
+    container_name: cloudstack-mgmt
+    restart: unless-stopped
+    working_dir: /opt/cloudstack
+    command: ["java", "-cp", "/opt/cloudstack/cloud-client-ui.jar:/opt/cloudstack/lib/*", "org.apache.cloudstack.ServerDaemon"]
+    environment:
+      TZ: "Asia/Ho_Chi_Minh"
+      JAVA_TOOL_OPTIONS: "--add-opens=java.base/java.lang=ALL-UNNAMED -Xms512m -Xmx2048m -Dlog4j.configurationFile=/opt/cloudstack/conf/log4j-cloud.xml"
+    ports:
+      - "0.0.0.0:28080:28080"
+      - "0.0.0.0:8250:8250"
+    volumes:
+      - ./client/target/cloud-client-ui-4.23.0.0-SNAPSHOT.jar:/opt/cloudstack/cloud-client-ui.jar:ro
+      - ./client/target/lib:/opt/cloudstack/lib:ro
+      - ./docker/conf:/opt/cloudstack/conf:ro
+      - ./docker/conf/commands.properties:/opt/cloudstack/commands.properties:ro
+      - ./scripts:/opt/cloudstack/scripts:ro
+      - ./engine/schema/dist/systemvm-templates:/opt/cloudstack/engine/schema/dist/systemvm-templates:ro
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    healthcheck:
+      test: ["CMD", "bash", "-lc", "exec 3<>/dev/tcp/127.0.0.1/28080"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 60s
+    networks:
+      - xiaozhi-net
+
+networks:
+  xiaozhi-net:
+    external: true
