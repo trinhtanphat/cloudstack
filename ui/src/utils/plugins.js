@@ -218,26 +218,43 @@ export const notifierPlugin = {
   install (app) {
     app.config.globalProperties.$notifyError = function (error) {
       console.log(error)
-      var msg = i18n.global.t('message.request.failed')
-      var desc = ''
-      if (error && error.response) {
-        if (error.response.status) {
-          msg = `${i18n.global.t('message.request.failed')} (${error.response.status})`
-        }
-        if (error.response.headers?.['x-description']) {
-          desc = error.response.headers['x-description']
-        } else if (error.response.data) {
-          const responseKey = _.findKey(error.response.data, 'errortext')
-          if (responseKey) {
-            desc = error.response.data[responseKey].errortext
-          } else if (typeof error.response.data === 'string') {
-            desc = error.response.data
-          }
-        }
-        if (!desc && error.message) {
-          desc = error.message
+      if (sourceToken.isCancel(error)) {
+        return
+      }
+
+      let msg = i18n.global.t('message.request.failed')
+      let desc = ''
+      const response = error?.response
+
+      if (response?.status) {
+        msg = `${i18n.global.t('message.request.failed')} (${response.status})`
+      }
+
+      if (response?.headers?.['x-description']) {
+        desc = response.headers['x-description']
+      } else if (response?.data) {
+        const responseKey = _.findKey(response.data, 'errortext')
+        if (responseKey && response.data?.[responseKey]?.errortext) {
+          desc = response.data[responseKey].errortext
+        } else if (response.data?.errorresponse?.errortext) {
+          desc = response.data.errorresponse.errortext
+        } else if (response.data?.errortext) {
+          desc = response.data.errortext
+        } else if (typeof response.data === 'string') {
+          desc = response.data
         }
       }
+
+      if (!desc && typeof error === 'string') {
+        desc = error
+      }
+      if (!desc && error?.message) {
+        desc = error.message
+      }
+      if (!desc) {
+        desc = i18n.global.t('message.request.failed')
+      }
+
       let countNotify = store.getters.countNotify
       countNotify++
       store.commit('SET_COUNT_NOTIFY', countNotify)

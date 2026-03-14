@@ -1250,11 +1250,13 @@ export default {
           this.$emit('change-resource', this.resource)
         }
       }).catch(error => {
-        if (!error || !error.message) {
-          console.log('API request likely got cancelled due to route change:', this.apiName)
+        if (sourceToken.isCancel(error)) {
+          console.log('API request cancelled due to route change:', this.apiName)
           return
         }
-        if ([401].includes(error.response.status)) {
+
+        const status = error?.response?.status
+        if ([401].includes(status)) {
           return
         }
 
@@ -1262,7 +1264,7 @@ export default {
           this.itemCount = 0
           this.items = []
           this.$message.error({
-            content: error.response.headers['x-description'],
+            content: error?.response?.headers?.['x-description'] || this.$t('message.request.failed'),
             duration: 5
           })
           return
@@ -1270,15 +1272,15 @@ export default {
 
         this.$notifyError(error)
 
-        if ([405].includes(error.response.status)) {
+        if ([405].includes(status)) {
           this.$router.push({ path: '/exception/403' })
         }
 
-        if ([430, 431, 432].includes(error.response.status)) {
+        if ([430, 431, 432].includes(status)) {
           this.$router.push({ path: '/exception/404' })
         }
 
-        if ([530, 531, 532, 533, 534, 535, 536, 537].includes(error.response.status)) {
+        if ([530, 531, 532, 533, 534, 535, 536, 537].includes(status)) {
           this.$router.push({ path: '/exception/500' })
         }
       }).finally(f => {
@@ -1684,7 +1686,12 @@ export default {
             this.fetchData()
           })
         }).catch(error => {
-          this.formRef.value.scrollToField(error.errorFields[0].name)
+          const field = error?.errorFields?.[0]?.name
+          if (field && this.formRef?.value?.scrollToField) {
+            this.formRef.value.scrollToField(field)
+          } else {
+            this.$notifyError(error)
+          }
         })
       } else {
         this.execSubmit(e)
@@ -1895,7 +1902,8 @@ export default {
           })
           this.closeAction()
         }).catch(error => {
-          if ([401].includes(error.response.status)) {
+          const status = error?.response?.status
+          if ([401].includes(status)) {
             return
           }
 
@@ -1906,7 +1914,12 @@ export default {
           this.actionLoading = false
         })
       }).catch(error => {
-        this.formRef.value.scrollToField(error.errorFields[0].name)
+        const field = error?.errorFields?.[0]?.name
+        if (field && this.formRef?.value?.scrollToField) {
+          this.formRef.value.scrollToField(field)
+        } else {
+          this.$notifyError(error)
+        }
       })
     },
     shouldNavigateBack (action) {

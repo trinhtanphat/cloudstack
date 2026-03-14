@@ -169,8 +169,8 @@
       <translation-menu/>
       </a-col>
       <a-col>
-        <router-link :to="{ name: 'VnsoServiceGuide' }" class="guide-link">
-          Huong dan Cloud Service
+        <router-link :to="{ name: 'documents' }" class="guide-link">
+          VNSO Documents
         </router-link>
       </a-col>
       <a-col v-if="forgotPasswordEnabled">

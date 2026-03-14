@@ -603,7 +603,12 @@ export default {
           })
         }
       }).catch(error => {
-        this.formRef.value.scrollToField(error.errorFields[0].name)
+        const field = error?.errorFields?.[0]?.name
+        if (field && this.formRef?.value?.scrollToField) {
+          this.formRef.value.scrollToField(field)
+        } else {
+          this.$notifyError(error)
+        }
       })
     },
     closeAction () {

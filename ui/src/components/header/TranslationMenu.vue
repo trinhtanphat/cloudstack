@@ -43,6 +43,7 @@
         <a-menu-item key="pt_BR" value="ptBR">Português brasileiro</a-menu-item>
         <a-menu-item key="ru_RU" value="ruRU">Русский</a-menu-item>
         <a-menu-item key="el_GR" value="elGR">Ελληνικά</a-menu-item>
+        <a-menu-item key="vi" value="vi">Tiếng Việt</a-menu-item>
       </a-menu>
     </template>
   </a-dropdown>
