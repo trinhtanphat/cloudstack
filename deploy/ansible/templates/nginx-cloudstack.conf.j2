@@ -12,6 +12,15 @@ server {
     ssl_certificate     {{ nginx_ssl_certificate }};
     ssl_certificate_key {{ nginx_ssl_certificate_key }};
 
+    # Security headers
+    add_header Strict-Transport-Security "max-age=63072000; includeSubDomains; preload" always;
+    add_header X-Frame-Options "SAMEORIGIN" always;
+    add_header X-Content-Type-Options "nosniff" always;
+    add_header X-XSS-Protection "1; mode=block" always;
+    add_header Referrer-Policy "strict-origin-when-cross-origin" always;
+    add_header Permissions-Policy "camera=(), microphone=(), geolocation=()" always;
+    add_header Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; connect-src 'self' wss: ws:; font-src 'self' data:; object-src 'none'; frame-ancestors 'self';" always;
+
     location = / {
         return 302 /client/;
     }
@@ -37,12 +46,30 @@ server {
         proxy_set_header Connection "upgrade";
         proxy_read_timeout 300s;
     }
+
+        # VNSO Service Guide - Vue Router SPA route
+        location /path-to-link {
+            proxy_pass http://{{ management_private_ip }}:28080/client/;
+            proxy_http_version 1.1;
+            proxy_set_header Host $host;
+            proxy_set_header X-Real-IP $remote_addr;
+            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+            proxy_set_header X-Forwarded-Proto https;
+            proxy_read_timeout 300s;
+        }
 }
 {% else %}
 server {
     listen 80;
     server_name {{ cloudstack_domain }} _;
 
+        # Security headers (HTTP only - for prod always use TLS block)
+        add_header X-Frame-Options "SAMEORIGIN" always;
+        add_header X-Content-Type-Options "nosniff" always;
+        add_header X-XSS-Protection "1; mode=block" always;
+        add_header Referrer-Policy "strict-origin-when-cross-origin" always;
+        add_header Permissions-Policy "camera=(), microphone=(), geolocation=()" always;
+
     location = / {
         return 302 /client/;
     }
@@ -68,5 +95,16 @@ server {
         proxy_set_header Connection "upgrade";
         proxy_read_timeout 300s;
     }
+
+        # VNSO Service Guide - Vue Router SPA route
+        location /path-to-link {
+            proxy_pass http://{{ management_private_ip }}:28080/client/;
+            proxy_http_version 1.1;
+            proxy_set_header Host $host;
+            proxy_set_header X-Real-IP $remote_addr;
+            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+            proxy_set_header X-Forwarded-Proto http;
+            proxy_read_timeout 300s;
+        }
 }
 {% endif %}
