@@ -96,6 +96,10 @@
         <module>integrations/cloudian</module>
         <module>integrations/prometheus</module>
         <module>integrations/kubernetes-service</module>
+        <module>integrations/bulk-service</module>
+        <module>integrations/dbaas-service</module>
+        <module>integrations/gpu-service</module>
+        <module>integrations/service-catalog</module>
 
         <module>metrics</module>
 
