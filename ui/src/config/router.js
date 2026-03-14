@@ -20,6 +20,7 @@ import { UserLayout, BasicLayout, RouteView } from '@/layouts'
 import AutogenView from '@/views/AutogenView.vue'
 import IFramePlugin from '@/views/plugins/IFramePlugin.vue'
 import ApiDocsPlugin from '@/views/plugins/ApiDocsPlugin.vue'
+import VnsoServiceGuide from '@/views/plugins/VnsoServiceGuide.vue'
 
 import { shallowRef } from 'vue'
 import { vueProps } from '@/vue-app'
@@ -44,6 +45,9 @@ import tools from '@/config/section/tools'
 import quota from '@/config/section/plugin/quota'
 import cloudian from '@/config/section/plugin/cloudian'
 import gcp from '@/config/section/gcp'
+import dbaas from '@/config/section/dbaas'
+import catalog from '@/config/section/catalog'
+import bulkops from '@/config/section/bulkops'
 
 function generateRouterMap (section) {
   var map = {
@@ -235,6 +239,9 @@ export function asyncRouterMap () {
       generateRouterMap(quota),
       generateRouterMap(cloudian),
       generateRouterMap(gcp),
+      generateRouterMap(dbaas),
+      generateRouterMap(catalog),
+      generateRouterMap(bulkops),
       {
         path: '/exception',
         name: 'exception',
@@ -366,5 +373,14 @@ export const constantRouterMap = [
   {
     path: '/500',
     component: () => import(/* webpackChunkName: "error" */ '@/views/exception/500')
+  },
+  {
+    path: '/path-to-link',
+    name: 'VnsoServiceGuide',
+    meta: {
+      title: 'Cloud Service Guide',
+      hidden: true
+    },
+    component: shallowRef(VnsoServiceGuide)
   }
 ]

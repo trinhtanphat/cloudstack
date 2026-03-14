@@ -164,9 +164,14 @@
         @click="handleSubmit"
       >{{ $t('label.login') }}</a-button>
     </a-form-item>
-    <a-row justify="space-between">
+    <a-row justify="space-between" align="middle">
       <a-col>
       <translation-menu/>
+      </a-col>
+      <a-col>
+        <router-link :to="{ name: 'VnsoServiceGuide' }" class="guide-link">
+          Huong dan Cloud Service
+        </router-link>
       </a-col>
       <a-col v-if="forgotPasswordEnabled">
         <router-link :to="{ name: 'forgotPassword' }">
@@ -608,6 +613,12 @@ export default {
         linear-gradient(#CCC 0 0) right;
       background-size: 40% 1px;
       background-repeat: no-repeat;
+    }
+
+    .guide-link {
+      font-size: 12px;
+      font-weight: 600;
+      color: #17614a;
     }
 }
 </style>
