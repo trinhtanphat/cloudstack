@@ -1,0 +1,29 @@
+name: GPU Service PR Gate
+
+on:
+  pull_request:
+    paths:
+      - 'plugins/integrations/gpu-service/**'
+      - 'plugins/pom.xml'
+      - '.github/workflows/gpu-service-pr.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  gpu-service-tests:
+    runs-on: ubuntu-22.04
+
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v5
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+          cache: 'maven'
+
+      - name: Build and test GPU service module
+        run: |
+          mvn -B -pl plugins/integrations/gpu-service -DskipITs test

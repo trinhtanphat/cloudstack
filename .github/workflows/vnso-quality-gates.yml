@@ -1,0 +1,37 @@
+name: VNSO Platform Quality Gates
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  quality-gates:
+    runs-on: ubuntu-22.04
+    env:
+      TARGET_URL: ${{ secrets.VNSO_TARGET_URL }}
+      MONITOR_ENDPOINT: ${{ secrets.VNSO_MONITOR_ENDPOINT }}
+      FAIL_ON_WARN: 1
+
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Validate required inputs
+        run: |
+          if [ -z "${TARGET_URL}" ]; then
+            echo "VNSO_TARGET_URL secret is required for release quality gates"
+            exit 1
+          fi
+
+      - name: Install prerequisites
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y curl nmap
+
+      - name: Run VNSO quality gates
+        run: |
+          scripts/vnso/run-platform-quality-gates.sh
