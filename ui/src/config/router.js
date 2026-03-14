@@ -21,6 +21,7 @@ import AutogenView from '@/views/AutogenView.vue'
 import IFramePlugin from '@/views/plugins/IFramePlugin.vue'
 import ApiDocsPlugin from '@/views/plugins/ApiDocsPlugin.vue'
 import VnsoServiceGuide from '@/views/plugins/VnsoServiceGuide.vue'
+import VnsoScaleDeploymentGuide from '@/views/plugins/VnsoScaleDeploymentGuide.vue'
 
 import { shallowRef } from 'vue'
 import { vueProps } from '@/vue-app'
@@ -46,6 +47,7 @@ import quota from '@/config/section/plugin/quota'
 import cloudian from '@/config/section/plugin/cloudian'
 import gcp from '@/config/section/gcp'
 import dbaas from '@/config/section/dbaas'
+import gpu from '@/config/section/gpu'
 import catalog from '@/config/section/catalog'
 import bulkops from '@/config/section/bulkops'
 
@@ -240,6 +242,7 @@ export function asyncRouterMap () {
       generateRouterMap(cloudian),
       generateRouterMap(gcp),
       generateRouterMap(dbaas),
+      generateRouterMap(gpu),
       generateRouterMap(catalog),
       generateRouterMap(bulkops),
       {
@@ -294,6 +297,19 @@ export function asyncRouterMap () {
   }
 
   const apidocs = vueProps.$config.apidocs
+  routerMap[0].children.push({
+    path: '/documents/',
+    name: 'documents',
+    component: shallowRef(VnsoServiceGuide),
+    meta: { title: 'VNSO Documents', icon: 'book-outlined' }
+  })
+  routerMap[0].children.push({
+    path: '/documents/scale-1000/',
+    name: 'documents-scale-1000',
+    component: shallowRef(VnsoScaleDeploymentGuide),
+    meta: { title: 'Scale 1000 Deployment', icon: 'deployment-unit-outlined' }
+  })
+
   if (apidocs !== false) {
     routerMap[0].children.push({
       path: '/apidocs/',
@@ -374,13 +390,5 @@ export const constantRouterMap = [
     path: '/500',
     component: () => import(/* webpackChunkName: "error" */ '@/views/exception/500')
   },
-  {
-    path: '/path-to-link',
-    name: 'VnsoServiceGuide',
-    meta: {
-      title: 'Cloud Service Guide',
-      hidden: true
-    },
-    component: shallowRef(VnsoServiceGuide)
-  }
+  { path: '/path-to-link', redirect: '/documents/', hidden: true }
 ]
