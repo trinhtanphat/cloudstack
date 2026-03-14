@@ -41,7 +41,7 @@
         </a-select>
       </a-form-item>
 
-      <a-form-item name="templateid" label="Template" required>
+      <a-form-item name="templateid" :label="$t('label.template')" required>
         <a-select v-model:value="form.templateid" :loading="templatesLoading" show-search :filter-option="filterOption">
           <a-select-option v-for="template in templates" :key="template.id" :value="template.id">
             {{ template.name }}
@@ -69,15 +69,15 @@
 
       <a-row :gutter="16">
         <a-col :span="12">
-          <a-form-item name="ipmode" label="Public Access Mode">
+          <a-form-item name="ipmode" :label="$t('label.public.access.mode')">
             <a-select v-model:value="form.ipmode" :disabled="!form.assignpublicip">
-              <a-select-option value="STATIC_NAT">Dedicated IP</a-select-option>
-              <a-select-option value="PORT_FORWARD">Shared IP + random public port</a-select-option>
+              <a-select-option value="STATIC_NAT">{{ $t('label.public.access.mode.staticnat') }}</a-select-option>
+              <a-select-option value="PORT_FORWARD">{{ $t('label.public.access.mode.portforward.full') }}</a-select-option>
             </a-select>
           </a-form-item>
         </a-col>
         <a-col :span="12">
-          <a-form-item name="allowedcidr" label="Allowed CIDR">
+          <a-form-item name="allowedcidr" :label="$t('label.allowed.cidr')">
             <a-input v-model:value="form.allowedcidr" placeholder="0.0.0.0/0" />
           </a-form-item>
         </a-col>

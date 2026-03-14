@@ -12,6 +12,8 @@
         <div class="hero-actions">
           <a href="#ec2">Bat dau voi EC2</a>
           <a href="#security">Checklist Security</a>
+          <a href="#gpu">GPU Blueprint</a>
+          <a href="#scale1000">Scale 1000 Playbook</a>
         </div>
       </div>
     </section>
@@ -56,13 +58,55 @@
       </div>
     </section>
 
+    <section id="gpu" class="content-section">
+      <h2>4) GPU Service: muc do san sang so voi AWS/Azure/GCP</h2>
+      <div class="service-grid">
+        <article class="service-card" v-for="item in gpuParity" :key="item.feature">
+          <header>
+            <h3>{{ item.feature }}</h3>
+            <span>{{ item.status }}</span>
+          </header>
+          <p>{{ item.gap }}</p>
+          <p class="service-tip">Next: {{ item.next }}</p>
+        </article>
+      </div>
+    </section>
+
+    <section class="content-section">
+      <h2>5) Automation test + pentest + monitoring</h2>
+      <ul class="ux-list">
+        <li v-for="item in qualityAutomation" :key="item">{{ item }}</li>
+      </ul>
+      <p class="footer-note">
+        Docs ky thuat trong repo: docs/GPU_CLOUD_SERVICE_ARCHITECTURE.md va docs/PLATFORM_VALIDATION_AUTOMATION.md
+      </p>
+    </section>
+
     <section class="content-section ux">
-      <h2>4) UI/UX can bo sung ngay</h2>
+      <h2>6) UI/UX can bo sung ngay</h2>
       <ul class="ux-list">
         <li v-for="item in uxImprovements" :key="item">{{ item }}</li>
       </ul>
       <p class="footer-note">
-        URL truy cap: https://cloudstack.vnso.vn/path-to-link
+        URL truy cap: https://cloudstack.vnso.vn/documents/
+      </p>
+    </section>
+
+    <section id="scale1000" class="content-section">
+      <h2>7) Playbook trien khai 1000 EC2 + 1000 Public IP/Port + 1000 Service</h2>
+      <div class="service-grid">
+        <article class="service-card" v-for="item in scale1000Playbook" :key="item.title">
+          <header>
+            <h3>{{ item.title }}</h3>
+            <span>{{ item.wave }}</span>
+          </header>
+          <ol>
+            <li v-for="step in item.steps" :key="step">{{ step }}</li>
+          </ol>
+        </article>
+      </div>
+      <p class="footer-note">
+        Trang chi tiet tren sidebar: /documents/scale-1000/ va docs/BULK_1000_EC2_1000_SERVICES_DEPLOYMENT_GUIDE.md
       </p>
     </section>
   </div>
@@ -155,12 +199,67 @@ export default {
           desc: 'Tap trung event log, alert theo SLO, va tao runbook cho su co thuong gap.'
         }
       ],
+      gpuParity: [
+        {
+          feature: 'GPU instance catalog (A100, L4, T4)',
+          status: 'Partial',
+          gap: 'CloudStack core co vGPU foundation, nhung plugin GCP/AWS-like chua co layer abstraction day du cho accelerator profile.',
+          next: 'Tao gpu profile catalog + API list/create/start/stop GPU instance voi quota theo profile.'
+        },
+        {
+          feature: 'GPU scheduling va placement',
+          status: 'Basic',
+          gap: 'Co host-level GPU awareness, nhung chua co policy scheduling theo MIG/NUMA/cost-aware nhu hyperscaler.',
+          next: 'Them scheduler policy: performance-first, cost-first, anti-affinity, zone-fallback.'
+        },
+        {
+          feature: 'Observability cho GPU',
+          status: 'Gap',
+          gap: 'Chua co dashboard GPU util/memory/power/temperature tu node exporter + DCGM exporter trong UI.',
+          next: 'Tich hop Prometheus + Grafana dashboard + alert profile cho GPU saturation va ECC errors.'
+        }
+      ],
+      qualityAutomation: [
+        'Smoke functional test API/UI cho deploy VM, DBaaS, Catalog, GPU workflow.',
+        'Pentest baseline OWASP ZAP + TLS/header/cookie checks.',
+        'Monitoring gate: check health endpoint, container health, and Prometheus metrics availability.',
+        'Regression gate theo release: fail build neu test coverage/scans khong dat nguong.'
+      ],
       uxImprovements: [
         'Them onboarding wizard theo service (EC2, MySQL, MongoDB, S3).',
         'Them progress tracker theo buoc trong trang tao service.',
         'Them template deployment one-click cho cac stack pho bien.',
         'Them health badge realtime ngay trong list service.',
         'Them action gan nhat va rollback nhanh trong trang detail.'
+      ],
+      scale1000Playbook: [
+        {
+          title: 'Prepare capacity and control-plane limits',
+          wave: 'Pre-flight',
+          steps: [
+            'Validate cluster-level CPU/RAM/storage and reserve 20% failover headroom.',
+            'Pre-pull templates and verify network, IP pool, and NAT capacity by zone.',
+            'Set API throttling and queue depth to avoid control-plane saturation.'
+          ]
+        },
+        {
+          title: 'Deploy 1000 EC2-like instances',
+          wave: 'Wave 1',
+          steps: [
+            'Split deployment into chunks 25-50 instances per batch.',
+            'Run smoke checks after each chunk and stop on error-rate threshold.',
+            'Track create latency p95 and failed jobs for immediate retry or rollback.'
+          ]
+        },
+        {
+          title: 'Allocate 1000 Public IP + Ports and 1000 Services',
+          wave: 'Wave 2',
+          steps: [
+            'Use deterministic allocator for public IP/port to prevent conflicts.',
+            'Apply service bootstrap by canary waves 5%-20%-50%-100%.',
+            'Gate each wave by health endpoint, logs, and SLO alerts.'
+          ]
+        }
       ]
     }
   }
