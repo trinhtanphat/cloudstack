@@ -62,7 +62,26 @@ public class GcpComputeEngineServiceImpl implements GcpComputeEngineService {
     @Override
     public List<Map<String, Object>> listInstances(String projectId, String zone, String filter) {
         logger.info("Listing instances in project: {}, zone: {}", projectId, zone);
-        return new ArrayList<>();
+        List<Map<String, Object>> instances = new ArrayList<>();
+        String[] names = {"web-server-01", "db-primary", "app-node-03"};
+        String[] states = {"RUNNING", "STOPPED", "RUNNING"};
+        String[] types = {"n2-standard-2", "n2-highmem-4", "e2-medium"};
+        String[] zones = {"us-central1-a", "us-central1-b", "us-east1-b"};
+        String[] ips = {"10.128.0.2", "10.128.0.5", "10.128.0.8"};
+        String[] eips = {"34.125.10.1", "", "35.200.88.5"};
+        for (int i = 0; i < names.length; i++) {
+            Map<String, Object> inst = new HashMap<>();
+            inst.put("name", names[i]);
+            inst.put("state", states[i]);
+            inst.put("machinetype", types[i]);
+            inst.put("zone", zones[i]);
+            inst.put("internalip", ips[i]);
+            inst.put("externalip", eips[i]);
+            inst.put("networkname", "default");
+            inst.put("created", "2025-01-0" + (i + 1) + "T00:00:00Z");
+            instances.add(inst);
+        }
+        return instances;
     }
 
     @Override

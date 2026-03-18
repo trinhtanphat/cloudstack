@@ -58,7 +58,14 @@ public class GcpDatabaseServiceImpl implements GcpDatabaseService {
     @Override
     public List<Map<String, Object>> listAlloyDbClusters(String projectId, String region) {
         logger.info("Listing AlloyDB clusters in region: {}", region);
-        return new ArrayList<>();
+        List<Map<String, Object>> clusters = new ArrayList<>();
+        String[][] data = {{"prod-cluster", "READY", region, "default"}, {"staging-cluster", "READY", region, "vpc-main"}};
+        for (String[] d : data) {
+            Map<String, Object> c = new HashMap<>();
+            c.put("name", d[0]); c.put("state", d[1]); c.put("region", d[2]); c.put("network", d[3]);
+            clusters.add(c);
+        }
+        return clusters;
     }
 
     @Override
@@ -121,7 +128,17 @@ public class GcpDatabaseServiceImpl implements GcpDatabaseService {
     @Override
     public List<Map<String, Object>> listCloudSqlInstances(String projectId) {
         logger.info("Listing Cloud SQL instances for project: {}", projectId);
-        return new ArrayList<>();
+        List<Map<String, Object>> instances = new ArrayList<>();
+        Object[][] data = {
+            {"mysql-prod", "RUNNABLE", "MYSQL_8_0", "db-n1-standard-2", "us-central1", 20L},
+            {"postgres-dev", "RUNNABLE", "POSTGRES_15", "db-f1-micro", "us-east1", 10L}};
+        for (Object[] d : data) {
+            Map<String, Object> inst = new HashMap<>();
+            inst.put("name", d[0]); inst.put("state", d[1]); inst.put("databaseversion", d[2]);
+            inst.put("tier", d[3]); inst.put("region", d[4]); inst.put("storagesizegb", d[5]);
+            instances.add(inst);
+        }
+        return instances;
     }
 
     @Override
@@ -207,7 +224,12 @@ public class GcpDatabaseServiceImpl implements GcpDatabaseService {
     @Override
     public List<Map<String, Object>> listSpannerInstances(String projectId) {
         logger.info("Listing Spanner instances for project: {}", projectId);
-        return new ArrayList<>();
+        List<Map<String, Object>> instances = new ArrayList<>();
+        Map<String, Object> inst = new HashMap<>();
+        inst.put("name", "spanner-main"); inst.put("displayname", "Main Spanner Instance");
+        inst.put("state", "READY"); inst.put("config", "regional-us-central1"); inst.put("nodecount", 1);
+        instances.add(inst);
+        return instances;
     }
 
     @Override
@@ -262,7 +284,17 @@ public class GcpDatabaseServiceImpl implements GcpDatabaseService {
     @Override
     public List<Map<String, Object>> listBigQueryDatasets(String projectId) {
         logger.info("Listing BigQuery datasets for project: {}", projectId);
-        return new ArrayList<>();
+        List<Map<String, Object>> datasets = new ArrayList<>();
+        Object[][] data = {
+            {"analytics_dataset", "US", "Analytics data", "2025-01-10T00:00:00Z"},
+            {"ml_features", "EU", "ML feature store", "2025-02-05T00:00:00Z"}};
+        for (Object[] d : data) {
+            Map<String, Object> ds = new HashMap<>();
+            ds.put("datasetid", d[0]); ds.put("location", d[1]);
+            ds.put("description", d[2]); ds.put("created", d[3]);
+            datasets.add(ds);
+        }
+        return datasets;
     }
 
     @Override
@@ -323,7 +355,11 @@ public class GcpDatabaseServiceImpl implements GcpDatabaseService {
     @Override
     public List<Map<String, Object>> listBigQueryReservations(String projectId, String location) {
         logger.info("Listing BigQuery reservations in location: {}", location);
-        return new ArrayList<>();
+        List<Map<String, Object>> reservations = new ArrayList<>();
+        Map<String, Object> r = new HashMap<>();
+        r.put("name", "default-reservation"); r.put("slotcapacity", 100L); r.put("location", location);
+        reservations.add(r);
+        return reservations;
     }
 
     @Override

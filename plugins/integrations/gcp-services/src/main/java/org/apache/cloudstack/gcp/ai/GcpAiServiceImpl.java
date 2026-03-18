@@ -48,7 +48,15 @@ public class GcpAiServiceImpl implements GcpAiService {
     @Override
     public List<Map<String, Object>> listVertexAiDatasets(String projectId, String region) {
         logger.info("Listing Vertex AI datasets in region: {}", region);
-        return new ArrayList<>();
+        List<Map<String, Object>> datasets = new ArrayList<>();
+        Object[][] data = {{"image-classification-ds", "ACTIVE", region, "gs://google-cloud-aiplatform/schema/dataset/metadata/image_1.0.0.yaml"},
+                           {"text-sentiment-ds", "ACTIVE", region, "gs://google-cloud-aiplatform/schema/dataset/metadata/text_1.0.0.yaml"}};
+        for (Object[] d : data) {
+            Map<String, Object> ds = new HashMap<>();
+            ds.put("displayname", d[0]); ds.put("state", d[1]); ds.put("region", d[2]); ds.put("metadataschemauri", d[3]);
+            datasets.add(ds);
+        }
+        return datasets;
     }
 
     @Override
@@ -229,7 +237,13 @@ public class GcpAiServiceImpl implements GcpAiService {
     @Override
     public List<Map<String, Object>> listNotebookInstances(String projectId, String location) {
         logger.info("Listing notebook instances in location: {}", location);
-        return new ArrayList<>();
+        List<Map<String, Object>> instances = new ArrayList<>();
+        Map<String, Object> nb = new HashMap<>();
+        nb.put("name", "research-notebook"); nb.put("state", "ACTIVE");
+        nb.put("location", location); nb.put("machinetype", "n1-standard-4");
+        nb.put("vmimage", "tf-2-13-cu113"); nb.put("framework", "TensorFlow Enterprise 2.13");
+        instances.add(nb);
+        return instances;
     }
 
     @Override

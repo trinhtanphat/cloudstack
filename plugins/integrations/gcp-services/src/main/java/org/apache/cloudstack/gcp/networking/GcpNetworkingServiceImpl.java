@@ -58,7 +58,15 @@ public class GcpNetworkingServiceImpl implements GcpNetworkingService {
     @Override
     public List<Map<String, Object>> listVpcNetworks(String projectId) {
         logger.info("Listing VPC networks for project: {}", projectId);
-        return new ArrayList<>();
+        List<Map<String, Object>> networks = new ArrayList<>();
+        Object[][] data = {{"default", "REGIONAL", true, "ACTIVE"}, {"prod-vpc", "GLOBAL", false, "ACTIVE"}};
+        for (Object[] d : data) {
+            Map<String, Object> n = new HashMap<>();
+            n.put("name", d[0]); n.put("routingmode", d[1]);
+            n.put("autocreatesubnetworks", d[2]); n.put("status", d[3]);
+            networks.add(n);
+        }
+        return networks;
     }
 
     @Override

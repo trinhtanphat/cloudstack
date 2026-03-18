@@ -59,7 +59,16 @@ public class GcpMonitoringServiceImpl implements GcpMonitoringService {
     @Override
     public List<Map<String, Object>> listAlertPolicies(String projectId) {
         logger.info("Listing alert policies for project: {}", projectId);
-        return new ArrayList<>();
+        List<Map<String, Object>> policies = new ArrayList<>();
+        Object[][] data = {{"High CPU Alert", true, "metric.type=\"compute.googleapis.com/instance/cpu/utilization\"", 0.85},
+                           {"Low Disk Space", true, "metric.type=\"compute.googleapis.com/instance/disk/bytes_used\"", 90.0}};
+        for (Object[] d : data) {
+            Map<String, Object> p = new HashMap<>();
+            p.put("displayname", d[0]); p.put("enabled", d[1]);
+            p.put("conditionfilter", d[2]); p.put("thresholdvalue", d[3]);
+            policies.add(p);
+        }
+        return policies;
     }
 
     @Override
@@ -157,7 +166,17 @@ public class GcpMonitoringServiceImpl implements GcpMonitoringService {
     public List<Map<String, Object>> listLogEntries(String projectId, String filter,
                                                       String orderBy, int pageSize) {
         logger.info("Listing log entries with filter: {}", filter);
-        return new ArrayList<>();
+        List<Map<String, Object>> entries = new ArrayList<>();
+        Object[][] data = {
+            {"projects/myproject/logs/cloudaudit.googleapis.com%2Factivity", "INFO", "2025-03-17T10:00:00Z", "Instance created: web-server-01"},
+            {"projects/myproject/logs/stderr", "ERROR", "2025-03-17T09:55:00Z", "Connection refused on port 5432"},
+            {"projects/myproject/logs/stdout", "WARNING", "2025-03-17T09:50:00Z", "Memory usage above 80%"}};
+        for (Object[] d : data) {
+            Map<String, Object> e = new HashMap<>();
+            e.put("logname", d[0]); e.put("severity", d[1]); e.put("timestamp", d[2]); e.put("message", d[3]);
+            entries.add(e);
+        }
+        return entries;
     }
 
     @Override

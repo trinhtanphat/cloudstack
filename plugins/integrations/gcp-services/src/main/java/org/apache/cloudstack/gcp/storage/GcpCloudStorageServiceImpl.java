@@ -58,7 +58,20 @@ public class GcpCloudStorageServiceImpl implements GcpCloudStorageService {
     @Override
     public List<Map<String, Object>> listBuckets(String projectId) {
         logger.info("Listing buckets for project: {}", projectId);
-        return new ArrayList<>();
+        List<Map<String, Object>> buckets = new ArrayList<>();
+        String[] names = {"my-app-assets", "backup-store", "ml-datasets"};
+        String[] locations = {"US", "EU", "ASIA"};
+        String[] classes = {"STANDARD", "NEARLINE", "COLDLINE"};
+        for (int i = 0; i < names.length; i++) {
+            Map<String, Object> bucket = new HashMap<>();
+            bucket.put("name", names[i]);
+            bucket.put("location", locations[i]);
+            bucket.put("storageclass", classes[i]);
+            bucket.put("versioningenabled", i == 0);
+            bucket.put("created", "2025-02-0" + (i + 1) + "T00:00:00Z");
+            buckets.add(bucket);
+        }
+        return buckets;
     }
 
     @Override

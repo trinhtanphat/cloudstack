@@ -2,10 +2,17 @@ FROM eclipse-temurin:17-jre
 
 # CloudStack startup needs ssh-keygen to generate system VM keypairs on first run.
 RUN apt-get update \
-    && apt-get install -y --no-install-recommends openssh-client bash ca-certificates tzdata ipmitool iproute2 \
+    && apt-get install -y --no-install-recommends openssh-client bash ca-certificates tzdata ipmitool iproute2 sudo \
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /opt/cloudstack
+
+# Keep a fallback copy of SystemVM template metadata in the image.
+# If the host bind-mount under /opt/cloudstack/engine/schema/dist/systemvm-templates
+# is incomplete, CloudStack can still read metadata from this default location.
+RUN mkdir -p /usr/share/cloudstack-management/templates/systemvm
+COPY engine/schema/dist/systemvm-templates/sha512sum.txt /usr/share/cloudstack-management/templates/systemvm/sha512sum.txt
+COPY engine/schema/dist/systemvm-templates/metadata.ini /usr/share/cloudstack-management/templates/systemvm/metadata.ini
 
 # Ensure SSH directory exists for management-server keypair generation.
 RUN mkdir -p /root/.ssh && chmod 700 /root/.ssh

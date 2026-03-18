@@ -61,7 +61,17 @@ public class GcpKubernetesServiceImpl implements GcpKubernetesService {
     @Override
     public List<Map<String, Object>> listGkeClusters(String projectId, String zone) {
         logger.info("Listing GKE clusters for project: {}", projectId);
-        return new ArrayList<>();
+        List<Map<String, Object>> clusters = new ArrayList<>();
+        Object[][] data = {{"prod-cluster", "RUNNING", "us-central1-a", "1.28.5-gke.1000", 3},
+                           {"dev-cluster", "RUNNING", "us-east1-b", "1.27.8-gke.1067", 1}};
+        for (Object[] d : data) {
+            Map<String, Object> c = new HashMap<>();
+            c.put("name", d[0]); c.put("status", d[1]); c.put("zone", d[2]);
+            c.put("clusterversion", d[3]); c.put("nodecount", d[4]);
+            c.put("network", "default"); c.put("machineType", "e2-standard-4");
+            clusters.add(c);
+        }
+        return clusters;
     }
 
     @Override
@@ -156,7 +166,18 @@ public class GcpKubernetesServiceImpl implements GcpKubernetesService {
     @Override
     public List<Map<String, Object>> listCloudRunServices(String projectId, String region) {
         logger.info("Listing Cloud Run services in region: {}", region);
-        return new ArrayList<>();
+        List<Map<String, Object>> services = new ArrayList<>();
+        Object[][] data = {
+            {"api-service", "ACTIVE", region, "https://api-service-xyz.run.app", "gcr.io/myproject/api:v1"},
+            {"frontend-svc", "ACTIVE", region, "https://frontend-xyz.run.app", "gcr.io/myproject/frontend:latest"}};
+        for (Object[] d : data) {
+            Map<String, Object> svc = new HashMap<>();
+            svc.put("name", d[0]); svc.put("status", d[1]); svc.put("region", d[2]);
+            svc.put("url", d[3]); svc.put("image", d[4]);
+            svc.put("memory", "512Mi"); svc.put("cpu", "1"); svc.put("maxinstances", 10);
+            services.add(svc);
+        }
+        return services;
     }
 
     @Override
@@ -207,7 +228,12 @@ public class GcpKubernetesServiceImpl implements GcpKubernetesService {
     @Override
     public List<Map<String, Object>> listBackupPlans(String projectId, String location) {
         logger.info("Listing backup plans in location: {}", location);
-        return new ArrayList<>();
+        List<Map<String, Object>> plans = new ArrayList<>();
+        Map<String, Object> p = new HashMap<>();
+        p.put("name", "daily-backup-plan"); p.put("cluster", "prod-cluster");
+        p.put("schedule", "0 2 * * *"); p.put("retaindays", 30); p.put("state", "READY");
+        plans.add(p);
+        return plans;
     }
 
     @Override

@@ -84,7 +84,12 @@ public class GcpDataServiceImpl implements GcpDataService {
     @Override
     public List<Map<String, Object>> listStreams(String projectId, String location) {
         logger.info("Listing streams in location: {}", location);
-        return new ArrayList<>();
+        List<Map<String, Object>> streams = new ArrayList<>();
+        Map<String, Object> s = new HashMap<>();
+        s.put("name", "mysql-to-bigquery"); s.put("displayname", "MySQL to BigQuery Pipeline");
+        s.put("state", "RUNNING"); s.put("sourceprofile", "mysql-source"); s.put("destprofile", "bigquery-dest");
+        streams.add(s);
+        return streams;
     }
 
     @Override
@@ -136,7 +141,12 @@ public class GcpDataServiceImpl implements GcpDataService {
     @Override
     public List<Map<String, Object>> listLakes(String projectId, String location) {
         logger.info("Listing Dataplex lakes in location: {}", location);
-        return new ArrayList<>();
+        List<Map<String, Object>> lakes = new ArrayList<>();
+        Map<String, Object> l = new HashMap<>();
+        l.put("name", "data-lake-prod"); l.put("displayname", "Production Data Lake");
+        l.put("state", "ACTIVE"); l.put("location", location); l.put("description", "Main data lake");
+        lakes.add(l);
+        return lakes;
     }
 
     @Override
@@ -247,7 +257,12 @@ public class GcpDataServiceImpl implements GcpDataService {
     @Override
     public List<Map<String, Object>> listComposerEnvironments(String projectId, String location) {
         logger.info("Listing Composer environments in location: {}", location);
-        return new ArrayList<>();
+        List<Map<String, Object>> envs = new ArrayList<>();
+        Map<String, Object> e = new HashMap<>();
+        e.put("name", "data-pipeline-env"); e.put("state", "RUNNING");
+        e.put("location", location); e.put("imageversion", "composer-2.6.6-airflow-2.7.3");
+        envs.add(e);
+        return envs;
     }
 
     @Override

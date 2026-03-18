@@ -25,6 +25,10 @@ echo -e "${GREEN}✓ Docker found${NC}"
 cd /root/cloudstack
 
 echo ""
+echo -e "${YELLOW}Preparing SystemVM template metadata...${NC}"
+./scripts/vnso/prepare-systemvm-metadata.sh
+
+echo ""
 echo -e "${YELLOW}Building CloudStack Docker image...${NC}"
 echo "This may take 10-15 minutes on first run (includes Maven build)..."
 

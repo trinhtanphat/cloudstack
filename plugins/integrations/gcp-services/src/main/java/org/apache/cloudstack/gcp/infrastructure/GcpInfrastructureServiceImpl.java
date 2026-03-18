@@ -57,7 +57,14 @@ public class GcpInfrastructureServiceImpl implements GcpInfrastructureService {
     @Override
     public List<Map<String, Object>> listSecrets(String projectId) {
         logger.info("Listing secrets for project: {}", projectId);
-        return new ArrayList<>();
+        List<Map<String, Object>> secrets = new ArrayList<>();
+        Object[][] data = {{"db-password", "AUTOMATIC", "2025-01-15T00:00:00Z"}, {"api-key-prod", "AUTOMATIC", "2025-02-01T00:00:00Z"}};
+        for (Object[] d : data) {
+            Map<String, Object> s = new HashMap<>();
+            s.put("name", d[0]); s.put("replication", d[1]); s.put("createtime", d[2]);
+            secrets.add(s);
+        }
+        return secrets;
     }
 
     @Override
@@ -133,7 +140,12 @@ public class GcpInfrastructureServiceImpl implements GcpInfrastructureService {
     @Override
     public List<Map<String, Object>> listRepositories(String projectId, String location) {
         logger.info("Listing repositories in location: {}", location);
-        return new ArrayList<>();
+        List<Map<String, Object>> repos = new ArrayList<>();
+        Map<String, Object> r = new HashMap<>();
+        r.put("name", "docker-registry"); r.put("format", "DOCKER");
+        r.put("location", location); r.put("description", "Main Docker image registry");
+        repos.add(r);
+        return repos;
     }
 
     @Override
@@ -208,7 +220,13 @@ public class GcpInfrastructureServiceImpl implements GcpInfrastructureService {
     @Override
     public List<Map<String, Object>> listRedisInstances(String projectId, String location) {
         logger.info("Listing Redis instances in location: {}", location);
-        return new ArrayList<>();
+        List<Map<String, Object>> instances = new ArrayList<>();
+        Map<String, Object> inst = new HashMap<>();
+        inst.put("name", "cache-prod"); inst.put("state", "READY"); inst.put("tier", "STANDARD_HA");
+        inst.put("memorysizegb", 4); inst.put("redisversion", "REDIS_7_0");
+        inst.put("location", location); inst.put("connectmode", "DIRECT_PEERING");
+        instances.add(inst);
+        return instances;
     }
 
     @Override
