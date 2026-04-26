@@ -1,0 +1,30 @@
+{
+  "name": "vnso-cloudstack-desktop",
+  "version": "1.0.0",
+  "private": true,
+  "description": "VNSO CloudStack desktop client (Electron) — secure WebView wrapper around the management UI.",
+  "main": "src/main.js",
+  "scripts": {
+    "start": "electron .",
+    "build": "electron-builder",
+    "build:linux": "electron-builder --linux",
+    "build:mac": "electron-builder --mac",
+    "build:win": "electron-builder --win"
+  },
+  "devDependencies": {
+    "electron": "^31.0.0",
+    "electron-builder": "^24.13.3"
+  },
+  "dependencies": {
+    "electron-store": "^10.0.0"
+  },
+  "build": {
+    "appId": "vn.vnso.cloudstack.desktop",
+    "productName": "VNSO CloudStack",
+    "asar": true,
+    "files": ["src/**/*", "assets/**/*", "package.json"],
+    "linux": { "target": ["AppImage", "deb"], "category": "Network" },
+    "mac": { "target": ["dmg"], "category": "public.app-category.business" },
+    "win": { "target": ["nsis"] }
+  }
+}
