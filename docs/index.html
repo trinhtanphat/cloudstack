@@ -1,0 +1,145 @@
+<!doctype html>
+<html lang="vi" data-theme="">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>VNSO CloudStack — Tổng quan nền tảng</title>
+<meta name="description" content="VNSO CloudStack — nền tảng IaaS thương mại hoá trên Apache CloudStack: GPU, DBaaS, BulkOps, Service Catalog, GCP integrations, HA, bảo mật và vận hành." />
+<link rel="stylesheet" href="assets/style.css" />
+<script src="assets/theme.js" defer></script>
+</head>
+<body>
+<header class="site-header">
+  <div class="wrap">
+    <a class="brand" href="index.html"><span class="dot"></span> VNSO CloudStack</a>
+    <nav class="primary" aria-label="Primary">
+      <a href="index.html" class="active">Tổng quan</a>
+      <a href="features.html">Tính năng</a>
+      <a href="architecture.html">Kiến trúc</a>
+      <a href="operations.html">Vận hành & Bảo mật</a>
+    </nav>
+    <span class="spacer"></span>
+    <button type="button" class="theme-toggle" aria-label="Toggle theme">☾ Dark</button>
+  </div>
+</header>
+
+<main class="wrap">
+  <section class="hero">
+    <h1>Nền tảng IaaS doanh nghiệp dựa trên Apache CloudStack</h1>
+    <p class="lead">
+      VNSO CloudStack là bản phân phối thương mại hoá của Apache CloudStack, bổ sung
+      GPU-as-a-Service, Database-as-a-Service, Bulk Operations, Service Catalog,
+      tích hợp GCP và bộ công cụ vận hành/bảo mật cho môi trường multi-zone, HA.
+    </p>
+    <div class="cta">
+      <a class="btn btn-primary" href="features.html">Xem tính năng →</a>
+      <a class="btn btn-ghost" href="architecture.html">Kiến trúc</a>
+      <a class="btn btn-ghost" href="operations.html">Vận hành</a>
+    </div>
+  </section>
+
+  <h2>Điểm nổi bật</h2>
+  <div class="grid">
+    <div class="card">
+      <span class="tag ok">GA</span>
+      <h3>Compute đa hypervisor</h3>
+      <p>KVM, VMware vSphere, XenServer/XCP-ng, Hyper-V, LXC. Orchestration multi-zone, multi-pod, multi-cluster.</p>
+    </div>
+    <div class="card">
+      <span class="tag ok">GA</span>
+      <h3>GPU Cloud Service</h3>
+      <p>Khởi tạo VM GPU NVIDIA (A100/H100/L40S/RTX), passthrough &amp; vGPU, telemetry và quota theo project.</p>
+    </div>
+    <div class="card">
+      <span class="tag ok">GA</span>
+      <h3>Database-as-a-Service</h3>
+      <p>MySQL, PostgreSQL, MongoDB, Redis với backup/restore, snapshot, monitoring và HA replica.</p>
+    </div>
+    <div class="card">
+      <span class="tag ok">GA</span>
+      <h3>Service Catalog</h3>
+      <p>Khởi tạo workload theo template (EC2-like, MySQL, MongoDB, S3) với batch tracker và clipboard helper.</p>
+    </div>
+    <div class="card">
+      <span class="tag ok">GA</span>
+      <h3>Bulk Operations</h3>
+      <p>Triển khai 1000+ VM/dịch vụ song song, theo dõi tiến trình, retry và rollback.</p>
+    </div>
+    <div class="card">
+      <span class="tag beta">Beta</span>
+      <h3>GCP Integrations</h3>
+      <p>22 GCP service connectors: GCE, GKE, GCS, BigQuery, Cloud SQL, Pub/Sub, IAM, ... cho hybrid cloud.</p>
+    </div>
+    <div class="card">
+      <span class="tag ok">GA</span>
+      <h3>Kubernetes Service</h3>
+      <p>CKS clusters: tạo, scale, upgrade, autoscaler, hỗ trợ network policy &amp; storage class.</p>
+    </div>
+    <div class="card">
+      <span class="tag ok">GA</span>
+      <h3>HA &amp; Multi-Zone</h3>
+      <p>Management server cluster + MySQL InnoDB cluster, NFS/Ceph primary, replicated secondary, fail-over zone.</p>
+    </div>
+    <div class="card">
+      <span class="tag ok">GA</span>
+      <h3>Bảo mật &amp; Compliance</h3>
+      <p>HSTS, CSP, X-Frame, RBAC, API key rotation, pentest baseline, OWASP Top-10 hardening.</p>
+    </div>
+    <div class="card">
+      <span class="tag ok">GA</span>
+      <h3>Quota &amp; Billing</h3>
+      <p>Tariff theo tài nguyên, usage report, balance, gắn được với hệ thống billing ngoài.</p>
+    </div>
+    <div class="card">
+      <span class="tag ok">GA</span>
+      <h3>Quan sát hệ thống</h3>
+      <p>Tích hợp Prometheus exporter, dashboard health, alerts, và VNSO monitoring scripts.</p>
+    </div>
+    <div class="card">
+      <span class="tag ok">GA</span>
+      <h3>Đa nền tảng client</h3>
+      <p>Web UI Vue 3 (i18n vi/en), CLI (cmk), REST/Query API, SDK Python &amp; cloud-cli.</p>
+    </div>
+  </div>
+
+  <h2>Bắt đầu nhanh</h2>
+  <div class="grid">
+    <div class="card">
+      <h3>1. Triển khai bằng Docker</h3>
+      <p>Dùng <code>docker-compose.prod.yml</code> để chạy management + MySQL + UI. Xem
+      <a href="https://github.com/apache/cloudstack/tree/main/docker">docker/</a> và
+      <a href="../DOCKER_SETUP.md">DOCKER_SETUP.md</a>.</p>
+    </div>
+    <div class="card">
+      <h3>2. Triển khai 3-server (Production)</h3>
+      <p>Theo <a href="../THREE-SERVER-DEPLOYMENT-PLAN.md">THREE-SERVER-DEPLOYMENT-PLAN.md</a>
+      và <a href="../DEPLOYMENT-RUNBOOK-4-SERVERS.md">DEPLOYMENT-RUNBOOK-4-SERVERS.md</a>.</p>
+    </div>
+    <div class="card">
+      <h3>3. Vận hành &amp; smoke test</h3>
+      <p>Chạy <code>scripts/vnso/run-functional-smoke.sh</code>,
+      <code>run-platform-quality-gates.sh</code>, <code>run-pentest-baseline.sh</code>.</p>
+    </div>
+    <div class="card">
+      <h3>4. Bulk &amp; Catalog</h3>
+      <p>Xem <a href="BULK_1000_EC2_1000_SERVICES_DEPLOYMENT_GUIDE.md">Bulk 1000 EC2 guide</a>
+      và <a href="SERVICE-CATALOG-GO-NO-GO-TEMPLATE.md">Service Catalog Go/No-Go</a>.</p>
+    </div>
+  </div>
+
+  <h2>Tài liệu tham khảo</h2>
+  <ul>
+    <li><a href="GPU_CLOUD_SERVICE_ARCHITECTURE.md">GPU Cloud Service — Kiến trúc &amp; phân tích parity</a></li>
+    <li><a href="PLATFORM_VALIDATION_AUTOMATION.md">Platform Validation &amp; Security Automation</a></li>
+    <li><a href="BULK_1000_EC2_1000_SERVICES_DEPLOYMENT_GUIDE.md">Bulk 1000 EC2 / 1000 Services Deployment</a></li>
+    <li><a href="CLOUDSTACK_ZONE2_STABILIZATION_RUNBOOK.md">Zone-2 Stabilization Runbook</a></li>
+    <li><a href="SERVICE-CATALOG-GO-NO-GO-TEMPLATE.md">Service Catalog Go/No-Go Template</a></li>
+    <li><a href="VNSO_DOCUMENTS_INDEX.md">Index toàn bộ tài liệu VNSO</a></li>
+  </ul>
+</main>
+
+<footer class="footer">
+  © VNSO CloudStack — dựa trên Apache CloudStack (Apache 2.0). Tài liệu landing page.
+</footer>
+</body>
+</html>

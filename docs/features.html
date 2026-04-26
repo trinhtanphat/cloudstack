@@ -1,0 +1,166 @@
+<!doctype html>
+<html lang="vi" data-theme="">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>VNSO CloudStack — Tính năng</title>
+<meta name="description" content="Danh mục đầy đủ tính năng của VNSO CloudStack: compute, network, storage, GPU, DBaaS, BulkOps, Catalog, GCP, K8s, HA, bảo mật." />
+<link rel="stylesheet" href="assets/style.css" />
+<script src="assets/theme.js" defer></script>
+</head>
+<body>
+<header class="site-header">
+  <div class="wrap">
+    <a class="brand" href="index.html"><span class="dot"></span> VNSO CloudStack</a>
+    <nav class="primary" aria-label="Primary">
+      <a href="index.html">Tổng quan</a>
+      <a href="features.html" class="active">Tính năng</a>
+      <a href="architecture.html">Kiến trúc</a>
+      <a href="operations.html">Vận hành &amp; Bảo mật</a>
+    </nav>
+    <span class="spacer"></span>
+    <button type="button" class="theme-toggle" aria-label="Toggle theme">☾ Dark</button>
+  </div>
+</header>
+
+<main class="wrap">
+  <h1>Danh mục tính năng</h1>
+  <p class="muted">Phiên bản hiện tại: VNSO CloudStack <code>4.23.0.0-SNAPSHOT</code>. Trạng thái: <span class="kbd">GA</span> = sẵn sàng production, <span class="kbd">Beta</span> = thử nghiệm có giới hạn.</p>
+
+  <h2>Compute &amp; Orchestration</h2>
+  <table>
+    <thead><tr><th>Tính năng</th><th>Mô tả</th><th>Trạng thái</th></tr></thead>
+    <tbody>
+      <tr><td>Multi-hypervisor</td><td>KVM, VMware vSphere, XenServer/XCP-ng, Hyper-V, LXC, OVM</td><td>GA</td></tr>
+      <tr><td>VM lifecycle</td><td>Deploy, start, stop, reboot, migrate (live), snapshot, scale</td><td>GA</td></tr>
+      <tr><td>Templates &amp; ISO</td><td>Import, register, copy giữa zone, format QCOW2/VHD/OVA/RAW</td><td>GA</td></tr>
+      <tr><td>Affinity / Anti-affinity</td><td>Host/cluster groups, dedicated resources</td><td>GA</td></tr>
+      <tr><td>Auto Scaling</td><td>Group VM theo metric Prometheus / counter</td><td>GA</td></tr>
+      <tr><td>VM HA</td><td>Tự động restart VM khi host fail (KVM HA)</td><td>GA</td></tr>
+    </tbody>
+  </table>
+
+  <h2>GPU Cloud Service</h2>
+  <table>
+    <thead><tr><th>Tính năng</th><th>Mô tả</th><th>Trạng thái</th></tr></thead>
+    <tbody>
+      <tr><td>GPU passthrough</td><td>NVIDIA A100/H100/L40S/RTX, AMD Instinct</td><td>GA</td></tr>
+      <tr><td>vGPU profiles</td><td>NVIDIA vGPU/MIG, time-slicing</td><td>GA</td></tr>
+      <tr><td>GPU offering</td><td>Service offering riêng cho GPU, quota theo project</td><td>GA</td></tr>
+      <tr><td>Telemetry</td><td>nvidia-smi exporter → Prometheus</td><td>GA</td></tr>
+      <tr><td>Driver bootstrap</td><td>Cloud-init scripts cài driver theo OS</td><td>GA</td></tr>
+    </tbody>
+  </table>
+
+  <h2>Database-as-a-Service (DBaaS)</h2>
+  <table>
+    <thead><tr><th>Tính năng</th><th>Mô tả</th><th>Trạng thái</th></tr></thead>
+    <tbody>
+      <tr><td>Engines</td><td>MySQL 8.x, PostgreSQL 14/15/16, MongoDB 6/7, Redis 7</td><td>GA</td></tr>
+      <tr><td>HA / Replication</td><td>Master-replica, Galera, MongoDB ReplicaSet, Redis Sentinel</td><td>GA</td></tr>
+      <tr><td>Backup / Restore</td><td>Snapshot lịch trình, restore point-in-time</td><td>GA</td></tr>
+      <tr><td>Parameter groups</td><td>Tuning preset cho OLTP/Analytics</td><td>GA</td></tr>
+      <tr><td>Monitoring</td><td>Slow log, conn count, replica lag</td><td>GA</td></tr>
+    </tbody>
+  </table>
+
+  <h2>Bulk Operations</h2>
+  <table>
+    <thead><tr><th>Tính năng</th><th>Mô tả</th><th>Trạng thái</th></tr></thead>
+    <tbody>
+      <tr><td>Batch deploy</td><td>1000+ VM hoặc service song song với worker pool</td><td>GA</td></tr>
+      <tr><td>Batch tracker</td><td>UI theo dõi tiến trình real-time, retry failed</td><td>GA</td></tr>
+      <tr><td>Templating</td><td>YAML/JSON spec, biến hóa theo index</td><td>GA</td></tr>
+      <tr><td>Rollback</td><td>Tear-down toàn bộ batch khi lỗi vượt ngưỡng</td><td>GA</td></tr>
+    </tbody>
+  </table>
+
+  <h2>Service Catalog</h2>
+  <table>
+    <thead><tr><th>Tính năng</th><th>Mô tả</th><th>Trạng thái</th></tr></thead>
+    <tbody>
+      <tr><td>Catalog items</td><td>EC2-like VM, MySQL, MongoDB, S3-compatible bucket</td><td>GA</td></tr>
+      <tr><td>UX</td><td>Auto-focus form, toast notifications, copy clipboard</td><td>GA</td></tr>
+      <tr><td>Path-to-link guide</td><td>Playbook trực quan trong UI tại <code>/path-to-link</code></td><td>GA</td></tr>
+      <tr><td>Approval flow</td><td>Tuỳ chọn yêu cầu duyệt trước khi deploy</td><td>Beta</td></tr>
+    </tbody>
+  </table>
+
+  <h2>Network</h2>
+  <table>
+    <thead><tr><th>Tính năng</th><th>Mô tả</th><th>Trạng thái</th></tr></thead>
+    <tbody>
+      <tr><td>Isolated / Shared / L2</td><td>Guest network theo zone</td><td>GA</td></tr>
+      <tr><td>VPC</td><td>Multiple tier, private gateway, site-to-site VPN</td><td>GA</td></tr>
+      <tr><td>Load Balancer</td><td>VR-based LB (HAProxy), Netscaler, F5, internal LB</td><td>GA</td></tr>
+      <tr><td>Firewall &amp; ACL</td><td>Egress/ingress, network ACL theo VPC tier</td><td>GA</td></tr>
+      <tr><td>IPv6</td><td>Dual-stack guest network</td><td>GA</td></tr>
+      <tr><td>BGP / Tungsten Fabric</td><td>SDN integration, EVPN</td><td>Beta</td></tr>
+    </tbody>
+  </table>
+
+  <h2>Storage</h2>
+  <table>
+    <thead><tr><th>Tính năng</th><th>Mô tả</th><th>Trạng thái</th></tr></thead>
+    <tbody>
+      <tr><td>Primary</td><td>NFS, Ceph RBD, iSCSI, SolidFire, Linstor, SharedMountPoint</td><td>GA</td></tr>
+      <tr><td>Secondary</td><td>NFS, S3, Swift</td><td>GA</td></tr>
+      <tr><td>Object storage</td><td>Cloudian HyperStore integration (S3-compatible)</td><td>GA</td></tr>
+      <tr><td>Snapshots</td><td>Volume / VM, scheduled, cross-zone copy</td><td>GA</td></tr>
+      <tr><td>Encryption</td><td>LUKS at-rest cho KVM volumes</td><td>GA</td></tr>
+    </tbody>
+  </table>
+
+  <h2>Kubernetes &amp; Container</h2>
+  <table>
+    <thead><tr><th>Tính năng</th><th>Mô tả</th><th>Trạng thái</th></tr></thead>
+    <tbody>
+      <tr><td>CKS clusters</td><td>Tạo / scale / upgrade k8s qua API + UI</td><td>GA</td></tr>
+      <tr><td>CNI &amp; CSI</td><td>Calico, Cilium; CSI cho CloudStack volume</td><td>GA</td></tr>
+      <tr><td>Autoscaler</td><td>Cluster autoscaler tích hợp</td><td>GA</td></tr>
+    </tbody>
+  </table>
+
+  <h2>Hybrid Cloud — GCP</h2>
+  <table>
+    <thead><tr><th>Service</th><th>Trạng thái</th></tr></thead>
+    <tbody>
+      <tr><td>GCE, GKE, GCS, GCR, Cloud SQL, Pub/Sub, BigQuery, IAM</td><td>Beta</td></tr>
+      <tr><td>Cloud Functions, Cloud Run, Dataflow, Dataproc, Composer</td><td>Beta</td></tr>
+      <tr><td>VPC, Cloud Load Balancing, Cloud DNS, Cloud Armor</td><td>Beta</td></tr>
+      <tr><td>Secret Manager, KMS, Logging, Monitoring, Spanner</td><td>Beta</td></tr>
+    </tbody>
+  </table>
+  <p class="muted">Tổng cộng 22 connector. Quản lý tài khoản dịch vụ GCP và quota tập trung trong UI VNSO.</p>
+
+  <h2>Quota &amp; Billing</h2>
+  <table>
+    <thead><tr><th>Tính năng</th><th>Mô tả</th><th>Trạng thái</th></tr></thead>
+    <tbody>
+      <tr><td>Tariff</td><td>CPU, RAM, storage, network, GPU, DB, snapshot</td><td>GA</td></tr>
+      <tr><td>Usage report</td><td>CSV/JSON export, theo account/domain/project</td><td>GA</td></tr>
+      <tr><td>Balance &amp; alert</td><td>Email cảnh báo ngưỡng, suspend tự động</td><td>GA</td></tr>
+    </tbody>
+  </table>
+
+  <h2>UI / Client</h2>
+  <table>
+    <thead><tr><th>Client</th><th>Trạng thái build</th></tr></thead>
+    <tbody>
+      <tr><td>Web UI (Vue 3 + Vite)</td><td>GA — i18n vi/en, dark/light mode</td></tr>
+      <tr><td>CLI <code>cmk</code></td><td>GA</td></tr>
+      <tr><td>Python SDK</td><td>GA</td></tr>
+      <tr><td>cloud-cli (Go)</td><td>GA</td></tr>
+      <tr><td>Mobile (Android/iOS)</td><td>Roadmap — wrapper PWA hiện tại; native client trên roadmap</td></tr>
+      <tr><td>Desktop wrapper</td><td>Roadmap — Electron wrapper trên roadmap</td></tr>
+      <tr><td>Browser extension</td><td>Roadmap — quick-actions extension trên roadmap</td></tr>
+    </tbody>
+  </table>
+  <p class="muted">Web UI là client chính thức được kiểm thử (build, eslint, smoke). Các nhánh mobile/desktop/extension hiện ở roadmap; PWA đáp ứng phần lớn nhu cầu di động.</p>
+</main>
+
+<footer class="footer">
+  © VNSO CloudStack — Apache License 2.0.
+</footer>
+</body>
+</html>

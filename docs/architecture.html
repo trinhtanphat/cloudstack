@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="vi" data-theme="">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>VNSO CloudStack — Kiến trúc</title>
+<meta name="description" content="Kiến trúc tổng thể VNSO CloudStack: management cluster, MySQL InnoDB, hypervisors, storage, network, plugins." />
+<link rel="stylesheet" href="assets/style.css" />
+<script src="assets/theme.js" defer></script>
+</head>
+<body>
+<header class="site-header">
+  <div class="wrap">
+    <a class="brand" href="index.html"><span class="dot"></span> VNSO CloudStack</a>
+    <nav class="primary" aria-label="Primary">
+      <a href="index.html">Tổng quan</a>
+      <a href="features.html">Tính năng</a>
+      <a href="architecture.html" class="active">Kiến trúc</a>
+      <a href="operations.html">Vận hành &amp; Bảo mật</a>
+    </nav>
+    <span class="spacer"></span>
+    <button type="button" class="theme-toggle" aria-label="Toggle theme">☾ Dark</button>
+  </div>
+</header>
+
+<main class="wrap">
+  <h1>Kiến trúc nền tảng</h1>
+  <p class="muted">Mô tả cấp cao thành phần và luồng dữ liệu của VNSO CloudStack.</p>
+
+  <h2>Sơ đồ thành phần (text)</h2>
+<pre><code>+----------------------+       +-----------------------+
+|   Web UI (Vue 3)     | &lt;---&gt; |  Management Server    |
+|   CLI / SDK / API    |       |  (Java, Spring, REST) |
++----------+-----------+       +----+------------+-----+
+           |                         |            |
+           |  HTTPS (Nginx + HSTS)   | JDBC       | Async jobs
+           v                         v            v
++----------------------+    +----------------+   +------------------+
+|  Nginx Reverse Proxy |    |  MySQL InnoDB  |   |  RabbitMQ / SQS  |
+|  CSP / X-Frame / XCTO|    |  Cluster (HA)  |   |  Event bus       |
++----------------------+    +----------------+   +------------------+
+                                                       |
++--------------------------------------------------------------------+
+|                       Resource Layer                               |
+|                                                                    |
+|  Hypervisors                Storage                Network         |
+|  - KVM (libvirt)            - NFS / Ceph RBD       - VR (HAProxy)  |
+|  - VMware vSphere           - iSCSI / SolidFire    - Netscaler/F5  |
+|  - XenServer / XCP-ng       - Cloudian S3          - Tungsten      |
+|  - Hyper-V / LXC            - Swift                - BGP / VXLAN   |
++--------------------------------------------------------------------+
+
+Plugins (in plugins/integrations/):
+  gpu-service, dbaas-service, bulk-service, service-catalog,
+  gcp-services, kubernetes-service, prometheus, cloudian
+</code></pre>
+
+  <h2>Backend (Java / Spring)</h2>
+  <ul>
+    <li><strong>Management Server</strong>: orchestration, API endpoint, async job manager.</li>
+    <li><strong>Engine modules</strong>: <code>engine/orchestration</code>, <code>engine/schema</code>, <code>engine/storage</code>, <code>engine/network</code>.</li>
+    <li><strong>Plugins</strong>: nạp qua Spring context tại <code>plugins/integrations/{name}/src/main/resources/META-INF/cloudstack/</code>.</li>
+    <li><strong>SystemVM</strong>: virtual router, secondary storage VM, console proxy. Metadata bundle ở <code>/usr/share/cloudstack-management/templates/systemvm/</code>.</li>
+  </ul>
+
+  <h2>Frontend (Vue 3 + Vite)</h2>
+  <ul>
+    <li>Cấu hình section: <code>ui/src/config/section/*.js</code>, plugin UI: <code>ui/src/config/section/plugin/*.js</code>.</li>
+    <li>Component theo plugin: <code>ui/src/views/plugins/{gpu,dbaas,bulkops,catalog}/</code>.</li>
+    <li>i18n: vi + en (locale gốc Apache giữ nguyên, thêm bản dịch VNSO).</li>
+    <li>Dark/Light mode: chuyển nhanh; tương phản đạt WCAG AA cho text chính.</li>
+  </ul>
+
+  <h2>Triển khai HA tham khảo</h2>
+  <table>
+    <thead><tr><th>Mô hình</th><th>Số node</th><th>Mô tả</th></tr></thead>
+    <tbody>
+      <tr><td>POC / Lab</td><td>1</td><td>Docker compose, all-in-one. Xem <a href="../DOCKER_SETUP.md">DOCKER_SETUP.md</a>.</td></tr>
+      <tr><td>Small Prod</td><td>3</td><td>2 management + 1 DB (or InnoDB cluster). Xem <a href="../THREE-SERVER-DEPLOYMENT-PLAN.md">THREE-SERVER-DEPLOYMENT-PLAN.md</a>.</td></tr>
+      <tr><td>Standard Prod</td><td>4+</td><td>2 management + 2 MySQL + LB. Xem <a href="../DEPLOYMENT-RUNBOOK-4-SERVERS.md">DEPLOYMENT-RUNBOOK-4-SERVERS.md</a>.</td></tr>
+      <tr><td>Multi-zone</td><td>N</td><td>Mỗi zone có pod/cluster riêng; secondary storage replicated.</td></tr>
+    </tbody>
+  </table>
+
+  <h2>Luồng API</h2>
+  <ol>
+    <li>Client (UI/CLI/SDK) gọi REST <code>/client/api?command=...&amp;apikey=...&amp;signature=...</code>.</li>
+    <li>Nginx kiểm tra TLS + security headers, forward tới Management Server.</li>
+    <li>Management Server xác thực API key/signature, phân quyền RBAC.</li>
+    <li>Tạo async job (nếu cần), trả về <code>jobid</code>; client poll <code>queryAsyncJobResult</code>.</li>
+    <li>Job được resource manager xử lý: gọi hypervisor agent, tạo entries DB, cập nhật usage.</li>
+  </ol>
+
+  <h2>Tài liệu chi tiết</h2>
+  <ul>
+    <li><a href="GPU_CLOUD_SERVICE_ARCHITECTURE.md">GPU Cloud Service architecture</a></li>
+    <li><a href="../INFRASTRUCTURE.md">INFRASTRUCTURE.md</a></li>
+    <li><a href="../CLOUDSTACK-DEPLOYMENT-COMPLETE-GUIDE.md">Complete deployment guide</a></li>
+  </ul>
+</main>
+
+<footer class="footer">
+  © VNSO CloudStack — Apache License 2.0.
+</footer>
+</body>
+</html>

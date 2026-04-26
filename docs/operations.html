@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="vi" data-theme="">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>VNSO CloudStack — Vận hành &amp; Bảo mật</title>
+<meta name="description" content="HA, performance, load balance, security hardening và quy trình vận hành VNSO CloudStack." />
+<link rel="stylesheet" href="assets/style.css" />
+<script src="assets/theme.js" defer></script>
+</head>
+<body>
+<header class="site-header">
+  <div class="wrap">
+    <a class="brand" href="index.html"><span class="dot"></span> VNSO CloudStack</a>
+    <nav class="primary" aria-label="Primary">
+      <a href="index.html">Tổng quan</a>
+      <a href="features.html">Tính năng</a>
+      <a href="architecture.html">Kiến trúc</a>
+      <a href="operations.html" class="active">Vận hành &amp; Bảo mật</a>
+    </nav>
+    <span class="spacer"></span>
+    <button type="button" class="theme-toggle" aria-label="Toggle theme">☾ Dark</button>
+  </div>
+</header>
+
+<main class="wrap">
+  <h1>Vận hành, HA, Hiệu năng &amp; Bảo mật</h1>
+
+  <h2>High Availability</h2>
+  <ul>
+    <li><strong>Management cluster</strong>: ≥ 2 node Tomcat, dùng VIP/Keepalived hoặc external LB.</li>
+    <li><strong>MySQL HA</strong>: InnoDB Cluster (Group Replication) hoặc Galera; thiết lập <code>db.ha.enabled=true</code>.</li>
+    <li><strong>SystemVM HA</strong>: tự động tái tạo VR/SSVM/CPVM khi mất; theo dõi qua <code>scripts/vnso/cleanup-mshost-stale.sh</code>.</li>
+    <li><strong>VM HA</strong>: bật <code>ha.enabled</code> trên service offering; KVM HA dựa trên fencing libvirt.</li>
+    <li><strong>Storage HA</strong>: NFS multi-path, Ceph RBD replica ≥3, secondary có thể replicate cross-zone.</li>
+  </ul>
+
+  <h2>Load Balancing</h2>
+  <ul>
+    <li><strong>Tầng UI/API</strong>: Nginx (đã cấu hình HSTS, CSP, X-Frame) hoặc HAProxy trước các management node.</li>
+    <li><strong>Tầng tenant</strong>: Virtual Router (HAProxy), Netscaler, F5, hoặc internal LB.</li>
+    <li><strong>Health check</strong>: <code>/client/static/config.json</code> hoặc <code>/client/api?command=listCapabilities</code>.</li>
+    <li><strong>Sticky sessions</strong>: bật source IP / cookie cho UI, không bắt buộc cho API.</li>
+  </ul>
+
+  <h2>Hiệu năng &amp; Scaling</h2>
+  <table>
+    <thead><tr><th>Hạng mục</th><th>Khuyến nghị</th></tr></thead>
+    <tbody>
+      <tr><td>Management JVM</td><td>Heap 8–16 GB cho zone &lt;1000 host; G1GC, theo dõi GC pause.</td></tr>
+      <tr><td>MySQL</td><td><code>innodb_buffer_pool_size</code> ≥ 50% RAM; <code>max_connections</code> ≥ 1000.</td></tr>
+      <tr><td>Async job worker</td><td><code>job.expire.minutes</code>, <code>workers</code> = số core × 2.</td></tr>
+      <tr><td>Bulk deploy</td><td>Dùng plugin <code>bulk-service</code> với worker pool, retry exponential.</td></tr>
+      <tr><td>UI</td><td>Build production (<code>npm run build</code>) + cache static assets, gzip/brotli ở Nginx.</td></tr>
+    </tbody>
+  </table>
+
+  <h2>Bảo mật (đã hardening)</h2>
+  <ul>
+    <li>TLS 1.2+ với HSTS (<code>max-age=31536000; includeSubDomains; preload</code>).</li>
+    <li><strong>CSP</strong>: <code>default-src 'self'</code>, font/style/script restrict; cấu hình ở <code>nginx.conf</code>.</li>
+    <li><strong>Headers</strong>: <code>X-Frame-Options: SAMEORIGIN</code>, <code>X-Content-Type-Options: nosniff</code>,
+        <code>Referrer-Policy: strict-origin-when-cross-origin</code>, <code>Permissions-Policy</code> giới hạn camera/mic/geolocation.</li>
+    <li><strong>RBAC</strong>: Domain → Account → User; role và API permission per-section.</li>
+    <li><strong>API key rotation</strong>: <code>scripts/vnso/rotate-admin-api-key.sh</code>; lưu trong bảng <code>api_keypair</code>.</li>
+    <li><strong>Pentest baseline</strong>: <code>scripts/vnso/run-pentest-baseline.sh</code> chạy ZAP baseline + nikto.</li>
+    <li><strong>OWASP Top 10</strong>: A01 (RBAC), A02 (TLS+HSTS), A03 (parameterized SQL), A05 (security headers),
+        A07 (signed API), A09 (audit log), A10 (no SSRF trong management API).</li>
+    <li><strong>Audit</strong>: <code>cloud.event</code> + log Tomcat; chuyển ELK/Loki cho long-term.</li>
+  </ul>
+
+  <h2>Monitoring &amp; Quan sát</h2>
+  <ul>
+    <li>Prometheus exporter (plugin) + Grafana dashboard cho VM/host/zone.</li>
+    <li><code>scripts/vnso/run-monitoring-check.sh</code>: cron health check, gửi alert.</li>
+    <li>Dashboard health UI: status các zone, pod, cluster, host.</li>
+    <li>Log: <code>management-server.log</code>, <code>vmops.log</code>, <code>agent.log</code>; rotate qua logrotate.</li>
+  </ul>
+
+  <h2>Quality Gates &amp; CI</h2>
+  <ul>
+    <li><code>scripts/vnso/run-platform-quality-gates.sh</code> — gom build, lint, unit, smoke.</li>
+    <li><code>scripts/vnso/run-functional-smoke.sh</code> — đăng nhập, list zone/host/VM, deploy 1 VM thử.</li>
+    <li>GitHub Actions: <code>.github/workflows/</code> bao gồm GPU PR và VNSO quality gates.</li>
+  </ul>
+
+  <h2>Disaster Recovery</h2>
+  <ul>
+    <li>Snapshot MySQL theo lịch (xtrabackup) → object storage.</li>
+    <li>Secondary storage: replica cross-zone hoặc rclone sync sang S3.</li>
+    <li>Runbook khôi phục: <a href="CLOUDSTACK_ZONE2_STABILIZATION_RUNBOOK.md">Zone-2 Stabilization Runbook</a>.</li>
+  </ul>
+
+  <h2>Quy trình vận hành hằng ngày</h2>
+  <ol>
+    <li>Sáng: kiểm tra <code>run-monitoring-check.sh</code>, dashboard health, capacity zone.</li>
+    <li>Theo dõi job queue (<code>async_job</code>) — fail rate &lt; 1%.</li>
+    <li>Tuần: chạy <code>run-platform-quality-gates.sh</code> + <code>run-pentest-baseline.sh</code>.</li>
+    <li>Tháng: rotate API key admin, kiểm thử restore backup MySQL ở môi trường staging.</li>
+  </ol>
+</main>
+
+<footer class="footer">
+  © VNSO CloudStack — Apache License 2.0.
+</footer>
+</body>
+</html>
