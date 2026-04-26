@@ -63,8 +63,11 @@
 
 - [docs/index.html](docs/index.html) — Tổng quan
 - [docs/features.html](docs/features.html) — Danh mục tính năng đầy đủ
+- [docs/catalog.html](docs/catalog.html) — Catalog plugin & dịch vụ (search + filter)
 - [docs/architecture.html](docs/architecture.html) — Kiến trúc hệ thống
+- [docs/gcp-integrations.html](docs/gcp-integrations.html) — 22 GCP connectors cho hybrid cloud
 - [docs/operations.html](docs/operations.html) — HA, hiệu năng, bảo mật, vận hành
+- [docs/roadmap.html](docs/roadmap.html) — Roadmap & trạng thái Done/WIP/Planned
 
 Index Markdown: [docs/VNSO_DOCUMENTS_INDEX.md](docs/VNSO_DOCUMENTS_INDEX.md).
 
