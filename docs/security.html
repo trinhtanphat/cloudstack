@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="vi" data-theme="">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>VNSO CloudStack — Bảo mật</title>
+<meta name="description" content="Bảo mật VNSO CloudStack: TLS, HSTS, CSP, RBAC, rate-limit, OWASP Top-10, audit, key rotation." />
+<link rel="stylesheet" href="assets/style.css" />
+<script src="assets/theme.js" defer></script>
+</head>
+<body>
+<header class="site-header">
+  <div class="wrap">
+    <a class="brand" href="index.html"><span class="dot"></span> VNSO CloudStack</a>
+    <nav class="primary" aria-label="Primary">
+      <a href="index.html">Tổng quan</a>
+      <a href="features.html">Tính năng</a>
+      <a href="catalog.html">Catalog</a>
+      <a href="architecture.html">Kiến trúc</a>
+      <a href="clients.html">Clients</a>
+      <a href="gcp-integrations.html">GCP</a>
+      <a href="security.html" class="active">Bảo mật</a>
+      <a href="operations.html">Vận hành</a>
+      <a href="roadmap.html">Roadmap</a>
+    </nav>
+    <span class="spacer"></span>
+    <button type="button" class="theme-toggle" aria-label="Toggle theme">☾ Dark</button>
+  </div>
+</header>
+
+<main class="wrap">
+  <h1>Bảo mật &amp; Compliance</h1>
+  <p class="muted">Mặc định bật ON cho mọi triển khai production.</p>
+
+  <h2>Lớp mạng &amp; HTTP</h2>
+  <ul>
+    <li>TLS 1.2+ tại Nginx; HSTS <code>max-age=63072000; includeSubDomains; preload</code>.</li>
+    <li><strong>Rate-limit</strong> per-IP cho <code>/client/api</code> (30 r/s burst 60) và
+        <code>/client/api/login</code> (5 r/s burst 10) — chống credential stuffing/DoS.</li>
+    <li>Cấu hình mẫu: <code>scripts/vnso/nginx/vnso-cloudstack-hardening.conf</code>,
+        <code>vnso-cloudstack-headers.inc</code>, <code>vnso-cloudstack-locations.example.conf</code>.</li>
+  </ul>
+
+  <h2>Headers (mặc định)</h2>
+  <table>
+    <thead><tr><th>Header</th><th>Giá trị</th></tr></thead>
+    <tbody>
+      <tr><td>Strict-Transport-Security</td><td><code>max-age=63072000; includeSubDomains; preload</code></td></tr>
+      <tr><td>Content-Security-Policy</td><td>default-src self; script/style 'self' 'unsafe-inline'; frame-ancestors self; object-src none</td></tr>
+      <tr><td>X-Frame-Options</td><td>SAMEORIGIN</td></tr>
+      <tr><td>X-Content-Type-Options</td><td>nosniff</td></tr>
+      <tr><td>Referrer-Policy</td><td>strict-origin-when-cross-origin</td></tr>
+      <tr><td>Cross-Origin-Opener-Policy</td><td>same-origin</td></tr>
+      <tr><td>Cross-Origin-Resource-Policy</td><td>same-origin</td></tr>
+      <tr><td>Permissions-Policy</td><td>camera/mic/geolocation/payment/usb/accelerometer/gyroscope = ()</td></tr>
+    </tbody>
+  </table>
+
+  <h2>Xác thực &amp; phân quyền</h2>
+  <ul>
+    <li>API key + HMAC-SHA1 signature, phân định trong bảng <code>api_keypair</code>.</li>
+    <li>RBAC: Domain → Account → User; Role-based API permission per-section.</li>
+    <li>2FA: TOTP plugin (built-in) — bật ở user profile.</li>
+    <li>SSO: SAML2 / OAuth2 plugin sẵn có (xem <code>plugins/user-authenticators</code>).</li>
+    <li>Rotation: <code>scripts/vnso/rotate-admin-api-key.sh</code> (đã sẵn lịch crontab mẫu).</li>
+  </ul>
+
+  <h2>OWASP Top 10 — đối chiếu</h2>
+  <table>
+    <thead><tr><th>Mã</th><th>Rủi ro</th><th>Biện pháp trong VNSO CloudStack</th></tr></thead>
+    <tbody>
+      <tr><td>A01</td><td>Broken Access Control</td><td>RBAC, API permission per-command, audit log <code>cloud.event</code></td></tr>
+      <tr><td>A02</td><td>Cryptographic Failures</td><td>TLS 1.2+, HSTS, mật khẩu hash bcrypt, LUKS at-rest</td></tr>
+      <tr><td>A03</td><td>Injection</td><td>Parameterized SQL via JDBC, input validation tại API layer</td></tr>
+      <tr><td>A04</td><td>Insecure Design</td><td>Threat model documented; SystemVM tách isolated network</td></tr>
+      <tr><td>A05</td><td>Security Misconfiguration</td><td>Hardened nginx snippets, default deny SG, baseline scan</td></tr>
+      <tr><td>A06</td><td>Vulnerable Components</td><td>Dependabot/SCA trong CI, RAT license check, quality gates</td></tr>
+      <tr><td>A07</td><td>Auth Failures</td><td>Rate-limit /login, lockout policy, optional 2FA + SSO</td></tr>
+      <tr><td>A08</td><td>Software &amp; Data Integrity</td><td>Signed RPM/DEB; UI build với SRI khi public CDN</td></tr>
+      <tr><td>A09</td><td>Logging &amp; Monitoring</td><td>Audit event, Prometheus, alert; gửi ELK/Loki</td></tr>
+      <tr><td>A10</td><td>SSRF</td><td>Egress whitelist, internal LB không public, validate URL input</td></tr>
+    </tbody>
+  </table>
+
+  <h2>Pentest &amp; Compliance Automation</h2>
+  <ul>
+    <li><code>scripts/vnso/run-pentest-baseline.sh</code>: ZAP baseline + nikto scan UI + API.</li>
+    <li><code>scripts/vnso/run-platform-quality-gates.sh</code>: gom build, lint, smoke, license, SCA.</li>
+    <li><code>scripts/vnso/run-monitoring-check.sh</code>: cron health + alert manager bridge.</li>
+    <li>Báo cáo lỗ hổng: theo dõi qua <a href="https://cloudstack.apache.org/security.html">cloudstack.apache.org/security</a>.</li>
+  </ul>
+
+  <h2>Hardening checklist trước go-live</h2>
+  <ol>
+    <li>Đổi mật khẩu admin gốc, vô hiệu hoá user mặc định không dùng.</li>
+    <li>Bật TLS với chứng chỉ tin cậy; đặt <code>client.protocol=https</code>.</li>
+    <li>Apply 3 file nginx ở <code>scripts/vnso/nginx/</code> — kiểm tra bằng
+        <a href="https://securityheaders.com">securityheaders.com</a>.</li>
+    <li>Tạo role least-privilege; tránh dùng <em>root admin</em> cho automation.</li>
+    <li>Bật 2FA cho mọi tài khoản admin; bật SSO khi có IdP.</li>
+    <li>Lập lịch <code>rotate-admin-api-key.sh</code> ≥ 90 ngày/lần.</li>
+    <li>Replicate audit log sang ELK/Loki, retention ≥ 365 ngày.</li>
+    <li>Chạy <code>run-pentest-baseline.sh</code> ở staging; sửa mọi finding HIGH.</li>
+    <li>Test DR: restore MySQL backup &amp; secondary storage ở env staging hằng tháng.</li>
+  </ol>
+</main>
+
+<footer class="footer">© VNSO CloudStack — Apache License 2.0.</footer>
+</body>
+</html>

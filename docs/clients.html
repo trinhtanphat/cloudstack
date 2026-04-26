@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="vi" data-theme="">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>VNSO CloudStack — Clients</title>
+<meta name="description" content="Web UI, Mobile (Capacitor), Desktop (Electron), Browser Extension (MV3), CLI và SDK của VNSO CloudStack." />
+<link rel="stylesheet" href="assets/style.css" />
+<script src="assets/theme.js" defer></script>
+</head>
+<body>
+<header class="site-header">
+  <div class="wrap">
+    <a class="brand" href="index.html"><span class="dot"></span> VNSO CloudStack</a>
+    <nav class="primary" aria-label="Primary">
+      <a href="index.html">Tổng quan</a>
+      <a href="features.html">Tính năng</a>
+      <a href="catalog.html">Catalog</a>
+      <a href="architecture.html">Kiến trúc</a>
+      <a href="clients.html" class="active">Clients</a>
+      <a href="gcp-integrations.html">GCP</a>
+      <a href="security.html">Bảo mật</a>
+      <a href="operations.html">Vận hành</a>
+      <a href="roadmap.html">Roadmap</a>
+    </nav>
+    <span class="spacer"></span>
+    <button type="button" class="theme-toggle" aria-label="Toggle theme">☾ Dark</button>
+  </div>
+</header>
+
+<main class="wrap">
+  <h1>Clients đa nền tảng</h1>
+  <p class="muted">Mọi client dùng chung CloudStack REST API ký HMAC-SHA1, chia sẻ một tập credential.</p>
+
+  <div class="grid">
+    <div class="card">
+      <span class="tag ok">GA</span>
+      <h3>Web UI</h3>
+      <p>Vue 3 + Vite, i18n vi/en, light/dark mode, sidebar GPU/DBaaS/BulkOps/Catalog. Build:
+      <code>cd ui &amp;&amp; npm ci &amp;&amp; npm run build</code>.</p>
+    </div>
+    <div class="card">
+      <span class="tag ok">GA</span>
+      <h3>Mobile (Android &amp; iOS)</h3>
+      <p>Capacitor wrapper trong <code>mobile/</code>. WebView native ôm trọn UI, lưu credential
+      qua Keychain/EncryptedSharedPreferences. Hỗ trợ push notification.</p>
+      <p><code>npm run build:web &amp;&amp; npx cap add android &amp;&amp; npm run sync</code></p>
+    </div>
+    <div class="card">
+      <span class="tag ok">GA</span>
+      <h3>Desktop (Linux/macOS/Windows)</h3>
+      <p>Electron wrapper trong <code>desktop/</code>: <code>contextIsolation</code>,
+      <code>sandbox</code>, CSP injection, chặn navigation cross-origin. Đóng gói AppImage/deb/dmg/nsis.</p>
+      <p><code>npm install &amp;&amp; npm run build:linux</code></p>
+    </div>
+    <div class="card">
+      <span class="tag ok">GA</span>
+      <h3>Browser Extension (MV3)</h3>
+      <p>Chrome/Edge popup: list VM, Start/Stop/Reboot, copy API URL, mở Service Catalog. Polling
+      5 phút thông báo VM Error. Source: <code>extension/</code>.</p>
+    </div>
+    <div class="card">
+      <span class="tag ok">GA</span>
+      <h3>CLI <code>cmk</code></h3>
+      <p>Apache CloudStack CLI gốc — interactive shell, scriptable. Cài qua
+      <code>pip install cloudmonkey</code>.</p>
+    </div>
+    <div class="card">
+      <span class="tag ok">GA</span>
+      <h3>Python SDK</h3>
+      <p>Trong <code>python/</code>; cung cấp client typed cho mọi command, dùng cho automation/CI.</p>
+    </div>
+    <div class="card">
+      <span class="tag ok">GA</span>
+      <h3>cloud-cli (Go)</h3>
+      <p>CLI nhẹ trong <code>cloud-cli/</code> — single binary, dùng tốt trong CI và air-gapped env.</p>
+    </div>
+    <div class="card">
+      <span class="tag ok">GA</span>
+      <h3>REST / Query API</h3>
+      <p>Tất cả command có sẵn ở <code>/client/api?command=...</code>; kèm rate-limit per-IP qua
+      Nginx (xem <a href="security.html">Bảo mật</a>).</p>
+    </div>
+  </div>
+
+  <h2>Cài đặt nhanh</h2>
+  <h3>Mobile</h3>
+<pre><code>cd mobile
+npm install
+VNSO_MGMT_URL=https://manage.example.vn npm run build:web
+npx cap add android        # lần đầu
+npm run sync &amp;&amp; npm run open:android</code></pre>
+
+  <h3>Desktop</h3>
+<pre><code>cd desktop
+npm install
+npm start                  # chạy local
+npm run build:linux        # đóng gói AppImage/deb</code></pre>
+
+  <h3>Browser Extension</h3>
+  <ol>
+    <li><code>chrome://extensions</code> → bật <em>Developer mode</em>.</li>
+    <li>Nhấn <em>Load unpacked</em> → chọn thư mục <code>extension/</code>.</li>
+    <li>Mở popup → <em>Cấu hình</em> → nhập URL + API key/secret.</li>
+  </ol>
+
+  <h2>Khi nào dùng client nào?</h2>
+  <table>
+    <thead><tr><th>Use case</th><th>Khuyến nghị</th></tr></thead>
+    <tbody>
+      <tr><td>Vận hành hằng ngày, quản trị đầy đủ</td><td>Web UI hoặc Desktop</td></tr>
+      <tr><td>On-call alert / phản ứng nhanh</td><td>Mobile + Browser Extension</td></tr>
+      <tr><td>Automation / CI / IaC</td><td>cloud-cli, Python SDK, REST API</td></tr>
+      <tr><td>Bulk &gt; 1000 VM</td><td>Bulk plugin qua Web UI / REST</td></tr>
+    </tbody>
+  </table>
+</main>
+
+<footer class="footer">© VNSO CloudStack — Apache License 2.0.</footer>
+</body>
+</html>
