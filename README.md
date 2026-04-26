@@ -55,8 +55,9 @@
 
 - Plugins bổ sung: `gpu-service`, `dbaas-service`, `bulk-service`, `service-catalog`, `gcp-services` (22 connectors), `kubernetes-service`, `prometheus`, `cloudian`.
 - UI Vue 3 với chế độ **light/dark** (tương phản WCAG AA), i18n vi/en, sidebar GPU/DBaaS/BulkOps/Catalog.
-- Hardening Nginx: HSTS, CSP, X-Frame, X-Content-Type-Options, Referrer-Policy, Permissions-Policy.
-- Bộ script vận hành tại `scripts/vnso/`: smoke test, monitoring, pentest baseline, quality gates, key rotation.
+- Clients đa nền tảng: Web UI, **Mobile** (`mobile/` — Capacitor), **Desktop** (`desktop/` — Electron), **Browser Extension** (`extension/` — MV3), CLI `cmk`, Python SDK, cloud-cli (Go).
+- Hardening Nginx: HSTS, CSP, X-Frame, X-Content-Type-Options, Referrer-Policy, Permissions-Policy + rate-limit per-IP cho `/client/api` và `/client/api/login` (xem `scripts/vnso/nginx/`).
+- Bộ script vận hành tại `scripts/vnso/`: smoke test, monitoring, pentest baseline, quality gates, key rotation, async-job benchmark.
 - Triển khai mẫu: Docker compose 1-node, 3-server và 4-server runbook.
 
 **Tài liệu landing page** (mở trực tiếp trong trình duyệt):
@@ -65,8 +66,10 @@
 - [docs/features.html](docs/features.html) — Danh mục tính năng đầy đủ
 - [docs/catalog.html](docs/catalog.html) — Catalog plugin & dịch vụ (search + filter)
 - [docs/architecture.html](docs/architecture.html) — Kiến trúc hệ thống
+- [docs/clients.html](docs/clients.html) — Web / Mobile / Desktop / Extension / CLI / SDK
 - [docs/gcp-integrations.html](docs/gcp-integrations.html) — 22 GCP connectors cho hybrid cloud
-- [docs/operations.html](docs/operations.html) — HA, hiệu năng, bảo mật, vận hành
+- [docs/security.html](docs/security.html) — Bảo mật, OWASP Top-10, hardening checklist
+- [docs/operations.html](docs/operations.html) — HA, hiệu năng, vận hành
 - [docs/roadmap.html](docs/roadmap.html) — Roadmap & trạng thái Done/WIP/Planned
 
 Index Markdown: [docs/VNSO_DOCUMENTS_INDEX.md](docs/VNSO_DOCUMENTS_INDEX.md).

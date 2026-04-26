@@ -5,8 +5,13 @@ This index lists core documents for architecture, operations, and quality engine
 ## HTML Landing Pages (mở trực tiếp trong trình duyệt)
 - [docs/index.html](index.html) — Tổng quan
 - [docs/features.html](features.html) — Danh mục tính năng
+- [docs/catalog.html](catalog.html) — Catalog plugin & dịch vụ (search + filter)
 - [docs/architecture.html](architecture.html) — Kiến trúc
-- [docs/operations.html](operations.html) — HA, bảo mật, vận hành
+- [docs/clients.html](clients.html) — Web / Mobile / Desktop / Extension / CLI / SDK
+- [docs/gcp-integrations.html](gcp-integrations.html) — 22 GCP connectors
+- [docs/security.html](security.html) — Bảo mật & hardening checklist
+- [docs/operations.html](operations.html) — HA, hiệu năng, vận hành
+- [docs/roadmap.html](roadmap.html) — Roadmap & trạng thái
 
 ## Markdown
 - GPU architecture and parity analysis: [GPU_CLOUD_SERVICE_ARCHITECTURE.md](GPU_CLOUD_SERVICE_ARCHITECTURE.md)

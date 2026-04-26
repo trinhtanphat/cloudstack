@@ -17,8 +17,10 @@
       <a href="features.html" class="active">Tính năng</a>
       <a href="catalog.html">Catalog</a>
       <a href="architecture.html">Kiến trúc</a>
+      <a href="clients.html">Clients</a>
       <a href="gcp-integrations.html">GCP</a>
-      <a href="operations.html">Vận hành &amp; Bảo mật</a>
+      <a href="security.html">Bảo mật</a>
+      <a href="operations.html">Vận hành</a>
       <a href="roadmap.html">Roadmap</a>
     </nav>
     <span class="spacer"></span>
@@ -154,12 +156,12 @@
       <tr><td>CLI <code>cmk</code></td><td>GA</td></tr>
       <tr><td>Python SDK</td><td>GA</td></tr>
       <tr><td>cloud-cli (Go)</td><td>GA</td></tr>
-      <tr><td>Mobile (Android/iOS)</td><td>Roadmap — wrapper PWA hiện tại; native client trên roadmap</td></tr>
-      <tr><td>Desktop wrapper</td><td>Roadmap — Electron wrapper trên roadmap</td></tr>
-      <tr><td>Browser extension</td><td>Roadmap — quick-actions extension trên roadmap</td></tr>
+      <tr><td>Mobile (Android/iOS)</td><td>GA — Capacitor wrapper trong <code>mobile/</code> (xem <a href="clients.html">Clients</a>)</td></tr>
+      <tr><td>Desktop wrapper</td><td>GA — Electron + sandbox/CSP trong <code>desktop/</code></td></tr>
+      <tr><td>Browser extension</td><td>GA — MV3 quick-actions trong <code>extension/</code></td></tr>
     </tbody>
   </table>
-  <p class="muted">Web UI là client chính thức được kiểm thử (build, eslint, smoke). Các nhánh mobile/desktop/extension hiện ở roadmap; PWA đáp ứng phần lớn nhu cầu di động.</p>
+  <p class="muted">Tất cả client chia sẻ một bộ credential (HMAC-SHA1). Mobile/Desktop là wrapper bảo mật quanh Web UI; Extension dùng API trực tiếp cho thao tác nhanh.</p>
 </main>
 
 <footer class="footer">
