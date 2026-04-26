@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8" />
+<title>VNSO CloudStack — Cấu hình</title>
+<style>
+  body { font: 14px/1.5 system-ui, sans-serif; max-width: 520px; margin: 30px auto; padding: 0 16px; color: #0f172a; }
+  @media (prefers-color-scheme: dark) { body { background:#0b1220; color:#e6edf7; } input { background:#0f172a; color:#e6edf7; border-color:#243047; } }
+  h1 { font-size: 1.3rem; }
+  label { display:block; margin-top: 14px; }
+  input { width:100%; padding:8px 10px; margin-top:4px; border:1px solid #cbd5e1; border-radius:6px; }
+  button { margin-top: 16px; padding: 9px 18px; background:#0f766e; color:#fff; border:none; border-radius:6px; font-weight:600; cursor:pointer; }
+  .ok { color:#15803d; margin-left:10px; }
+</style>
+</head>
+<body>
+<h1>VNSO CloudStack — Cấu hình</h1>
+<p>Nhập management URL và API key/secret. Lưu trữ cục bộ trong trình duyệt (chrome.storage.local).</p>
+<label>Management URL <input id="url" type="url" placeholder="https://manage.example.vn" /></label>
+<label>API key <input id="apikey" type="text" /></label>
+<label>Secret key <input id="secret" type="password" /></label>
+<button id="save">Lưu</button><span id="ok" class="ok"></span>
+<script type="module">
+  import { getConfig, setConfig } from './api.js';
+  const cfg = await getConfig();
+  url.value = cfg.url; apikey.value = cfg.apikey; secret.value = cfg.secret;
+  save.addEventListener('click', async () => {
+    await setConfig({ url: url.value.trim(), apikey: apikey.value.trim(), secret: secret.value.trim() });
+    ok.textContent = '✔ Đã lưu';
+    setTimeout(() => ok.textContent = '', 2000);
+  });
+</script>
+</body>
+</html>

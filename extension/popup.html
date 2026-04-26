@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8" />
+<title>VNSO CloudStack</title>
+<link rel="stylesheet" href="popup.css" />
+</head>
+<body>
+<header>
+  <strong>VNSO CloudStack</strong>
+  <span id="status" class="status"></span>
+</header>
+<section class="actions">
+  <button data-cmd="refresh">Làm mới</button>
+  <button data-cmd="catalog">Service Catalog</button>
+  <button data-cmd="copyEndpoint">Copy API URL</button>
+  <button data-cmd="options">Cấu hình</button>
+</section>
+<section class="filter">
+  <select id="state">
+    <option value="">Tất cả</option>
+    <option value="Running">Running</option>
+    <option value="Stopped">Stopped</option>
+    <option value="Starting">Starting</option>
+    <option value="Error">Error</option>
+  </select>
+  <input id="search" placeholder="Tìm theo tên..." />
+</section>
+<ul id="list" class="list"></ul>
+<footer><small id="err"></small></footer>
+<script src="popup.js" type="module"></script>
+</body>
+</html>
