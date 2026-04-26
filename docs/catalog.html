@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="vi" data-theme="">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>VNSO CloudStack — Catalog plugin &amp; dịch vụ</title>
+<meta name="description" content="Catalog tra cứu các plugin và dịch vụ của VNSO CloudStack: hypervisors, storage, network, integrations, security, billing." />
+<link rel="stylesheet" href="assets/style.css" />
+<script src="assets/theme.js" defer></script>
+<script src="assets/catalog.js" defer></script>
+</head>
+<body>
+<a class="skip" href="#main">Bỏ qua điều hướng</a>
+<header class="site-header">
+  <div class="wrap">
+    <a class="brand" href="index.html"><span class="dot"></span> VNSO CloudStack</a>
+    <nav class="primary" aria-label="Primary">
+      <a href="index.html">Tổng quan</a>
+      <a href="features.html">Tính năng</a>
+      <a href="catalog.html" class="active">Catalog</a>
+      <a href="architecture.html">Kiến trúc</a>
+      <a href="gcp-integrations.html">GCP</a>
+      <a href="operations.html">Vận hành &amp; Bảo mật</a>
+      <a href="roadmap.html">Roadmap</a>
+    </nav>
+    <span class="spacer"></span>
+    <button type="button" class="theme-toggle" aria-label="Toggle theme">☾ Dark</button>
+  </div>
+</header>
+
+<main id="main" class="wrap">
+  <h1>Catalog plugin &amp; dịch vụ <span id="svc-count" class="count-pill">…</span></h1>
+  <p class="muted">Tra cứu nhanh các plugin trong <code>plugins/</code> và dịch vụ giá trị gia tăng VNSO. Lọc theo nhóm hoặc tìm theo tên.</p>
+
+  <div class="search-box">
+    <span aria-hidden="true">🔎</span>
+    <input id="svc-search" type="search" placeholder="Tìm theo tên plugin / từ khoá…" aria-label="Tìm plugin" />
+  </div>
+  <div class="filters" role="tablist" aria-label="Bộ lọc nhóm">
+    <button class="chip active" data-cat="all">Tất cả</button>
+    <button class="chip" data-cat="hypervisor">Hypervisor</button>
+    <button class="chip" data-cat="storage">Storage</button>
+    <button class="chip" data-cat="network">Network</button>
+    <button class="chip" data-cat="integrations">Integrations</button>
+    <button class="chip" data-cat="security">Security &amp; IAM</button>
+    <button class="chip" data-cat="ops">Ops &amp; Observability</button>
+    <button class="chip" data-cat="vnso">VNSO services</button>
+  </div>
+
+  <div class="grid">
+    <!-- Hypervisors -->
+    <article class="svc-card card" data-cat="hypervisor"><span class="tag ok">GA</span><h3>kvm</h3><p>KVM/libvirt agent &amp; resource — hypervisor mặc định cho VNSO.</p><div class="meta">plugins/hypervisors/kvm</div></article>
+    <article class="svc-card card" data-cat="hypervisor"><span class="tag ok">GA</span><h3>vmware</h3><p>vSphere/vCenter integration, full lifecycle VM.</p><div class="meta">plugins/hypervisors/vmware</div></article>
+    <article class="svc-card card" data-cat="hypervisor"><span class="tag ok">GA</span><h3>xenserver</h3><p>Citrix Hypervisor / XCP-ng resource &amp; pool support.</p><div class="meta">plugins/hypervisors/xenserver</div></article>
+    <article class="svc-card card" data-cat="hypervisor"><span class="tag ok">GA</span><h3>hyperv</h3><p>Microsoft Hyper-V agent integration.</p><div class="meta">plugins/hypervisors/hyperv</div></article>
+    <article class="svc-card card" data-cat="hypervisor"><span class="tag ok">GA</span><h3>baremetal</h3><p>Baremetal provisioning qua IPMI/PXE.</p><div class="meta">plugins/hypervisors/baremetal</div></article>
+    <article class="svc-card card" data-cat="hypervisor"><span class="tag beta">Beta</span><h3>ovm / ovm3</h3><p>Oracle VM 2.x &amp; 3.x compatibility.</p><div class="meta">plugins/hypervisors/ovm*</div></article>
+    <article class="svc-card card" data-cat="hypervisor"><span class="tag ok">GA</span><h3>simulator</h3><p>Hypervisor giả lập cho dev/CI test.</p><div class="meta">plugins/hypervisors/simulator</div></article>
+    <article class="svc-card card" data-cat="hypervisor"><span class="tag ok">GA</span><h3>ucs</h3><p>Cisco UCS blade chassis manager.</p><div class="meta">plugins/hypervisors/ucs</div></article>
+
+    <!-- Storage -->
+    <article class="svc-card card" data-cat="storage"><span class="tag ok">GA</span><h3>image storage</h3><p>S3/Swift/NFS image stores &amp; secondary storage drivers.</p><div class="meta">plugins/storage/image</div></article>
+    <article class="svc-card card" data-cat="storage"><span class="tag ok">GA</span><h3>volume storage</h3><p>Primary storage drivers: NFS, Ceph RBD, SolidFire, ScaleIO, Datera, …</p><div class="meta">plugins/storage/volume</div></article>
+    <article class="svc-card card" data-cat="storage"><span class="tag ok">GA</span><h3>object storage</h3><p>Object store driver (Cloudian / S3-compatible).</p><div class="meta">plugins/storage/object</div></article>
+    <article class="svc-card card" data-cat="storage"><span class="tag ok">GA</span><h3>sharedfs</h3><p>Shared filesystem (NFS-style) provisioning &amp; mount.</p><div class="meta">plugins/storage/sharedfs</div></article>
+    <article class="svc-card card" data-cat="storage"><span class="tag ok">GA</span><h3>storage-allocators</h3><p>Bộ chiến lược cấp phát storage theo tier/affinity.</p><div class="meta">plugins/storage-allocators</div></article>
+    <article class="svc-card card" data-cat="storage"><span class="tag ok">GA</span><h3>cloudian</h3><p>Cloudian HyperStore object storage integration.</p><div class="meta">plugins/integrations/cloudian</div></article>
+
+    <!-- Network -->
+    <article class="svc-card card" data-cat="network"><span class="tag ok">GA</span><h3>internal-loadbalancer</h3><p>Internal LB built-in cho guest network.</p><div class="meta">plugins/network-elements/internal-loadbalancer</div></article>
+    <article class="svc-card card" data-cat="network"><span class="tag ok">GA</span><h3>elastic-loadbalancer</h3><p>Elastic IP + LB cho EC2-style network.</p><div class="meta">plugins/network-elements/elastic-loadbalancer</div></article>
+    <article class="svc-card card" data-cat="network"><span class="tag ok">GA</span><h3>netscaler</h3><p>Citrix NetScaler (ADC) load-balancer integration.</p><div class="meta">plugins/network-elements/netscaler</div></article>
+    <article class="svc-card card" data-cat="network"><span class="tag ok">GA</span><h3>nicira-nvp / vxlan / netris</h3><p>SDN providers: Nicira NVP, native VXLAN, Netris.</p><div class="meta">plugins/network-elements/{nicira-nvp,vxlan,netris}</div></article>
+    <article class="svc-card card" data-cat="network"><span class="tag ok">GA</span><h3>juniper-contrail</h3><p>Juniper Contrail / Tungsten Fabric SDN.</p><div class="meta">plugins/network-elements/juniper-contrail</div></article>
+    <article class="svc-card card" data-cat="network"><span class="tag ok">GA</span><h3>bigswitch / brocade-vcs / cisco-vnmc</h3><p>SDN/Fabric controllers &amp; firewall managers.</p><div class="meta">plugins/network-elements/{bigswitch,brocade-vcs,cisco-vnmc}</div></article>
+    <article class="svc-card card" data-cat="network"><span class="tag ok">GA</span><h3>dns-notifier / globodns</h3><p>DNS notify hooks &amp; Globo DNS provider.</p><div class="meta">plugins/network-elements/{dns-notifier,globodns}</div></article>
+
+    <!-- Integrations -->
+    <article class="svc-card card" data-cat="integrations"><span class="tag beta">Beta</span><h3>gcp-services</h3><p>22 GCP service connectors: GCE, GKE, GCS, BigQuery, Cloud SQL, Pub/Sub, Composer, Vertex Notebook, Gemini, Dataplex…</p><div class="meta">plugins/integrations/gcp-services · <a href="gcp-integrations.html">chi tiết</a></div></article>
+    <article class="svc-card card" data-cat="integrations"><span class="tag ok">GA</span><h3>kubernetes-service</h3><p>CKS — quản trị Kubernetes cluster trong CloudStack.</p><div class="meta">plugins/integrations/kubernetes-service</div></article>
+    <article class="svc-card card" data-cat="integrations"><span class="tag ok">GA</span><h3>service-catalog</h3><p>Catalog tạo workload từ template (EC2-like, MySQL, MongoDB, S3) với batch tracker.</p><div class="meta">plugins/integrations/service-catalog</div></article>
+    <article class="svc-card card" data-cat="integrations"><span class="tag ok">GA</span><h3>bulk-service</h3><p>Bulk operations: tạo 1000 VM/dịch vụ song song, theo dõi tiến trình.</p><div class="meta">plugins/integrations/bulk-service</div></article>
+    <article class="svc-card card" data-cat="integrations"><span class="tag ok">GA</span><h3>dbaas-service</h3><p>DBaaS: MySQL/Postgres/Mongo/Redis có HA + backup + monitor.</p><div class="meta">plugins/integrations/dbaas-service</div></article>
+    <article class="svc-card card" data-cat="integrations"><span class="tag ok">GA</span><h3>gpu-service</h3><p>GPU-as-a-Service: passthrough &amp; vGPU NVIDIA, telemetry, quota.</p><div class="meta">plugins/integrations/gpu-service</div></article>
+
+    <!-- Security & IAM -->
+    <article class="svc-card card" data-cat="security"><span class="tag ok">GA</span><h3>acl</h3><p>Bộ ACL điều khiển truy cập tài nguyên theo project/domain.</p><div class="meta">plugins/acl</div></article>
+    <article class="svc-card card" data-cat="security"><span class="tag ok">GA</span><h3>ca</h3><p>Certificate Authority service — quản trị TLS cert nội bộ.</p><div class="meta">plugins/ca</div></article>
+    <article class="svc-card card" data-cat="security"><span class="tag ok">GA</span><h3>user-authenticators</h3><p>SAML2, LDAP, OAuth2, MD5/SHA-256, plain authenticators.</p><div class="meta">plugins/user-authenticators</div></article>
+    <article class="svc-card card" data-cat="security"><span class="tag ok">GA</span><h3>user-two-factor-authenticators</h3><p>2FA: TOTP &amp; static OTP plugins.</p><div class="meta">plugins/user-two-factor-authenticators</div></article>
+    <article class="svc-card card" data-cat="security"><span class="tag ok">GA</span><h3>api</h3><p>API discovery &amp; rate-limit plugins.</p><div class="meta">plugins/api</div></article>
+
+    <!-- Ops & Observability -->
+    <article class="svc-card card" data-cat="ops"><span class="tag ok">GA</span><h3>prometheus</h3><p>Prometheus exporter cho metrics CloudStack.</p><div class="meta">plugins/integrations/prometheus</div></article>
+    <article class="svc-card card" data-cat="ops"><span class="tag ok">GA</span><h3>metrics</h3><p>Bộ metric internal cho dashboard CloudStack.</p><div class="meta">plugins/metrics</div></article>
+    <article class="svc-card card" data-cat="ops"><span class="tag ok">GA</span><h3>event-bus</h3><p>Event bus drivers: in-memory, Kafka, RabbitMQ.</p><div class="meta">plugins/event-bus</div></article>
+    <article class="svc-card card" data-cat="ops"><span class="tag ok">GA</span><h3>alert-handlers</h3><p>SNMP / Syslog alert handlers.</p><div class="meta">plugins/alert-handlers</div></article>
+    <article class="svc-card card" data-cat="ops"><span class="tag ok">GA</span><h3>backup</h3><p>Backup providers: dummy, NAS, Veeam, Networker.</p><div class="meta">plugins/backup</div></article>
+    <article class="svc-card card" data-cat="ops"><span class="tag ok">GA</span><h3>maintenance / drs / ha-planners</h3><p>Maintenance mode, DRS rebalancer, HA planners.</p><div class="meta">plugins/{maintenance,drs,ha-planners}</div></article>
+    <article class="svc-card card" data-cat="ops"><span class="tag ok">GA</span><h3>deployment-planners / host-allocators / affinity-group-processors</h3><p>Bộ chiến lược lập lịch deploy + affinity/anti-affinity.</p><div class="meta">plugins/{deployment-planners,host-allocators,affinity-group-processors}</div></article>
+    <article class="svc-card card" data-cat="ops"><span class="tag ok">GA</span><h3>outofbandmanagement-drivers</h3><p>IPMI / Redfish OOB management drivers.</p><div class="meta">plugins/outofbandmanagement-drivers</div></article>
+
+    <!-- VNSO services -->
+    <article class="svc-card card" data-cat="vnso"><span class="tag ok">GA</span><h3>VNSO Service Catalog UI</h3><p>UI Vue 3 với batch tracker, auto-focus, toast, clipboard copy, i18n vi/en.</p><div class="meta">ui/src/views/plugins/serviceCatalog</div></article>
+    <article class="svc-card card" data-cat="vnso"><span class="tag ok">GA</span><h3>VNSO Quality Gates</h3><p><code>scripts/vnso/run-platform-quality-gates.sh</code> — kiểm tra build/test/security trước release.</p><div class="meta">scripts/vnso</div></article>
+    <article class="svc-card card" data-cat="vnso"><span class="tag ok">GA</span><h3>VNSO Functional Smoke</h3><p><code>run-functional-smoke.sh</code> — smoke test 30+ chức năng end-to-end.</p><div class="meta">scripts/vnso</div></article>
+    <article class="svc-card card" data-cat="vnso"><span class="tag ok">GA</span><h3>VNSO Pentest baseline</h3><p><code>run-pentest-baseline.sh</code> — quét OWASP baseline + nikto + sslyze.</p><div class="meta">scripts/vnso</div></article>
+    <article class="svc-card card" data-cat="vnso"><span class="tag ok">GA</span><h3>VNSO Zone-2 Stabilization</h3><p>Runbook ổn định zone-2: <a href="CLOUDSTACK_ZONE2_STABILIZATION_RUNBOOK.md">runbook</a>.</p><div class="meta">docs/CLOUDSTACK_ZONE2_STABILIZATION_RUNBOOK.md</div></article>
+  </div>
+
+  <p class="muted" style="margin-top:24px;">Cần thêm plugin? Mở PR vào <code>plugins/</code> hoặc tham chiếu <a href="VNSO_DOCUMENTS_INDEX.md">VNSO_DOCUMENTS_INDEX.md</a>.</p>
+</main>
+
+<footer class="footer">© VNSO CloudStack — dựa trên Apache CloudStack (Apache 2.0).</footer>
+</body>
+</html>

@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="vi" data-theme="">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>VNSO CloudStack — GCP Integrations</title>
+<meta name="description" content="Tích hợp Google Cloud từ CloudStack: 22 service connectors cho hybrid cloud — GCE, GKE, GCS, BigQuery, AlloyDB, Cloud SQL, Vertex, Gemini." />
+<link rel="stylesheet" href="assets/style.css" />
+<script src="assets/theme.js" defer></script>
+</head>
+<body>
+<a class="skip" href="#main">Bỏ qua điều hướng</a>
+<header class="site-header">
+  <div class="wrap">
+    <a class="brand" href="index.html"><span class="dot"></span> VNSO CloudStack</a>
+    <nav class="primary" aria-label="Primary">
+      <a href="index.html">Tổng quan</a>
+      <a href="features.html">Tính năng</a>
+      <a href="catalog.html">Catalog</a>
+      <a href="architecture.html">Kiến trúc</a>
+      <a href="gcp-integrations.html" class="active">GCP</a>
+      <a href="operations.html">Vận hành &amp; Bảo mật</a>
+      <a href="roadmap.html">Roadmap</a>
+    </nav>
+    <span class="spacer"></span>
+    <button type="button" class="theme-toggle" aria-label="Toggle theme">☾ Dark</button>
+  </div>
+</header>
+
+<main id="main" class="wrap">
+  <section class="hero">
+    <h1>Hybrid Cloud — Tích hợp Google Cloud</h1>
+    <p class="lead">Plugin <code>plugins/integrations/gcp-services</code> cung cấp 22 connector cho phép quản trị tài nguyên Google Cloud trực tiếp từ CloudStack API/UI: tạo VM, GKE cluster, bucket, Cloud SQL, BigQuery, Composer, Vertex Notebook, Gemini, Dataplex, …</p>
+  </section>
+
+  <h2>Mức độ phủ tính năng</h2>
+  <table>
+    <thead><tr><th>Nhóm</th><th>API CloudStack</th><th>Tương đương GCP</th><th>Trạng thái</th></tr></thead>
+    <tbody>
+      <tr><td rowspan="2">Compute</td><td><code>createGcpInstance</code></td><td>Compute Engine — Instances</td><td><span class="tag ok">GA</span></td></tr>
+      <tr><td><code>listGcpInstances</code></td><td>Compute Engine — Instances list</td><td><span class="tag ok">GA</span></td></tr>
+      <tr><td>Containers</td><td><code>createGcpGkeCluster</code></td><td>GKE — Cluster</td><td><span class="tag ok">GA</span></td></tr>
+      <tr><td>Serverless</td><td><code>listGcpCloudRunServices</code></td><td>Cloud Run</td><td><span class="tag beta">Beta</span></td></tr>
+      <tr><td rowspan="2">Storage</td><td><code>createGcpBucket</code></td><td>Cloud Storage</td><td><span class="tag ok">GA</span></td></tr>
+      <tr><td><code>listGcpBackupPlans</code></td><td>Backup &amp; DR Service</td><td><span class="tag beta">Beta</span></td></tr>
+      <tr><td rowspan="3">Database</td><td><code>createGcpCloudSql</code></td><td>Cloud SQL</td><td><span class="tag ok">GA</span></td></tr>
+      <tr><td><code>listGcpCloudSqlInstances</code></td><td>Cloud SQL list</td><td><span class="tag ok">GA</span></td></tr>
+      <tr><td><code>listGcpAlloyDbClusters</code></td><td>AlloyDB</td><td><span class="tag beta">Beta</span></td></tr>
+      <tr><td rowspan="2">Analytics</td><td><code>listGcpBigQueryDatasets</code></td><td>BigQuery datasets</td><td><span class="tag ok">GA</span></td></tr>
+      <tr><td><code>listGcpBigQueryReservations</code></td><td>BigQuery reservations</td><td><span class="tag ok">GA</span></td></tr>
+      <tr><td>Data engineering</td><td><code>listGcpComposerEnvironments</code></td><td>Cloud Composer (Airflow)</td><td><span class="tag beta">Beta</span></td></tr>
+      <tr><td>Data governance</td><td><code>listGcpDataplexLakes</code></td><td>Dataplex</td><td><span class="tag beta">Beta</span></td></tr>
+      <tr><td rowspan="2">AI/ML</td><td><code>listGcpNotebookInstances</code></td><td>Vertex AI Workbench</td><td><span class="tag ok">GA</span></td></tr>
+      <tr><td><code>listGcpGeminiModels</code></td><td>Gemini API / Vertex Models</td><td><span class="tag beta">Beta</span></td></tr>
+      <tr><td>Networking</td><td><code>listGcpVpcNetworks</code></td><td>VPC Networks</td><td><span class="tag ok">GA</span></td></tr>
+      <tr><td rowspan="2">Security</td><td><code>listGcpSecrets</code></td><td>Secret Manager</td><td><span class="tag ok">GA</span></td></tr>
+      <tr><td>IAM bindings</td><td>Cloud IAM</td><td><span class="tag beta">Beta</span></td></tr>
+      <tr><td>Observability</td><td><code>listGcpLogEntries</code></td><td>Cloud Logging</td><td><span class="tag ok">GA</span></td></tr>
+    </tbody>
+  </table>
+
+  <h2>Cấu hình nhanh</h2>
+  <pre><code># 1) Đặt service-account key cho CloudStack management
+cloudmonkey set apikey ...
+cloudmonkey set secretkey ...
+# 2) Cấu hình project &amp; credentials GCP qua global setting
+cloudmonkey update configuration name=gcp.project.id value="my-vnso-project"
+cloudmonkey update configuration name=gcp.credentials.path value="/etc/cloudstack/management/gcp-sa.json"
+
+# 3) Liệt kê VM GCP
+cloudmonkey list gcpinstances zoneid=&lt;zone-uuid&gt;
+
+# 4) Tạo bucket GCS
+cloudmonkey create gcpbucket name=vnso-cs-prod-logs location=ASIA-SOUTHEAST1 storageclass=STANDARD</code></pre>
+
+  <h2>Kịch bản hybrid điển hình</h2>
+  <div class="grid">
+    <div class="card">
+      <h3>Burst-out compute</h3>
+      <p>Khi quota local hết, tự động tạo VM tại GCE qua <code>createGcpInstance</code>, gắn vào VPN site-to-site đã có.</p>
+    </div>
+    <div class="card">
+      <h3>Backup off-site</h3>
+      <p>Snapshot CloudStack → đẩy lên GCS bucket bằng <code>createGcpBucket</code> + lifecycle rule (Coldline / Archive).</p>
+    </div>
+    <div class="card">
+      <h3>Data lake unified</h3>
+      <p>Đồng bộ dữ liệu từ DBaaS local sang BigQuery dataset (<code>listGcpBigQueryDatasets</code>) phục vụ phân tích.</p>
+    </div>
+    <div class="card">
+      <h3>AI inference</h3>
+      <p>VM local gọi mô hình Gemini/Vertex qua <code>listGcpGeminiModels</code> + Vertex Notebook để fine-tune.</p>
+    </div>
+    <div class="card">
+      <h3>Quan sát tập trung</h3>
+      <p>Đẩy log audit CloudStack lên Cloud Logging, query bằng <code>listGcpLogEntries</code>.</p>
+    </div>
+    <div class="card">
+      <h3>Disaster recovery</h3>
+      <p>Replicate volume → GCS + tạo Cloud SQL replica từ MySQL local cho DR-as-a-Service.</p>
+    </div>
+  </div>
+
+  <h2>Bảo mật</h2>
+  <ul>
+    <li>Khoá service-account lưu trên management server với chmod <code>0600</code>; xoay vòng định kỳ.</li>
+    <li>Mọi gọi GCP đều log audit qua <code>event-bus</code> &amp; <code>alert-handlers</code>.</li>
+    <li>Áp dụng <em>least-privilege</em> ở phía GCP IAM cho service account integration.</li>
+    <li>Network egress đi qua proxy đã được whitelist trong firewall VNSO.</li>
+  </ul>
+</main>
+
+<footer class="footer">© VNSO CloudStack — Hybrid module dùng Google Cloud APIs.</footer>
+</body>
+</html>

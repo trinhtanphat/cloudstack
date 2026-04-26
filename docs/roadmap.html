@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="vi" data-theme="">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>VNSO CloudStack — Roadmap &amp; trạng thái</title>
+<meta name="description" content="Trạng thái triển khai (Done / WIP / Planned) các tính năng VNSO CloudStack và hướng phát triển tiếp theo." />
+<link rel="stylesheet" href="assets/style.css" />
+<script src="assets/theme.js" defer></script>
+</head>
+<body>
+<a class="skip" href="#main">Bỏ qua điều hướng</a>
+<header class="site-header">
+  <div class="wrap">
+    <a class="brand" href="index.html"><span class="dot"></span> VNSO CloudStack</a>
+    <nav class="primary" aria-label="Primary">
+      <a href="index.html">Tổng quan</a>
+      <a href="features.html">Tính năng</a>
+      <a href="catalog.html">Catalog</a>
+      <a href="architecture.html">Kiến trúc</a>
+      <a href="gcp-integrations.html">GCP</a>
+      <a href="operations.html">Vận hành &amp; Bảo mật</a>
+      <a href="roadmap.html" class="active">Roadmap</a>
+    </nav>
+    <span class="spacer"></span>
+    <button type="button" class="theme-toggle" aria-label="Toggle theme">☾ Dark</button>
+  </div>
+</header>
+
+<main id="main" class="wrap">
+  <h1>Roadmap &amp; trạng thái</h1>
+  <p class="muted">Tổng hợp các hạng mục triển khai cho VNSO CloudStack. Trạng thái: <span class="tag ok">Done</span> · <span class="tag beta">WIP</span> · <span class="tag todo">Planned</span>.</p>
+
+  <h2>✅ Đã hoàn tất (Done)</h2>
+  <ul class="status-list">
+    <li class="done"><span class="dot-status">✓</span>Compute đa hypervisor: KVM, VMware, XenServer/XCP-ng, Hyper-V, Baremetal, UCS.</li>
+    <li class="done"><span class="dot-status">✓</span>GPU Cloud Service (passthrough &amp; vGPU NVIDIA, telemetry, quota theo project).</li>
+    <li class="done"><span class="dot-status">✓</span>Database-as-a-Service: MySQL/PostgreSQL/MongoDB/Redis với HA + backup + monitor.</li>
+    <li class="done"><span class="dot-status">✓</span>Service Catalog với batch tracker, auto-focus, toast, clipboard copy, i18n vi/en.</li>
+    <li class="done"><span class="dot-status">✓</span>Bulk operations triển khai 1000+ VM/dịch vụ song song có retry &amp; rollback.</li>
+    <li class="done"><span class="dot-status">✓</span>22 GCP service connectors (xem trang <a href="gcp-integrations.html">GCP Integrations</a>).</li>
+    <li class="done"><span class="dot-status">✓</span>Kubernetes Service (CKS): create / scale / upgrade / autoscaler.</li>
+    <li class="done"><span class="dot-status">✓</span>HA Management server cluster + MySQL InnoDB cluster, NFS/Ceph primary, replicated secondary.</li>
+    <li class="done"><span class="dot-status">✓</span>Bảo mật: HSTS, CSP, X-Frame, RBAC, API key rotation, OWASP Top-10 hardening.</li>
+    <li class="done"><span class="dot-status">✓</span>Quan sát hệ thống: Prometheus exporter, dashboard health, alert handlers (SNMP/Syslog).</li>
+    <li class="done"><span class="dot-status">✓</span>Quota &amp; Billing tariff theo tài nguyên, usage report, balance.</li>
+    <li class="done"><span class="dot-status">✓</span>Web UI Vue 3 (i18n vi/en) + CLI <code>cmk</code> + REST/Query API + SDK Python &amp; cloud-cli.</li>
+    <li class="done"><span class="dot-status">✓</span>VNSO scripts: <code>run-functional-smoke.sh</code>, <code>run-platform-quality-gates.sh</code>, <code>run-pentest-baseline.sh</code>.</li>
+    <li class="done"><span class="dot-status">✓</span>GitHub Actions: GPU service PR workflow + VNSO quality gates workflow.</li>
+    <li class="done"><span class="dot-status">✓</span>Tài liệu HTML landing pages (Tổng quan, Tính năng, Catalog, Kiến trúc, GCP, Vận hành, Roadmap) — light/dark mode AA.</li>
+    <li class="done"><span class="dot-status">✓</span>Runbook ổn định Zone-2, plan triển khai 3-server &amp; 4-server.</li>
+    <li class="done"><span class="dot-status">✓</span>Service Catalog Go/No-Go template &amp; index tài liệu VNSO.</li>
+  </ul>
+
+  <h2>🚧 Đang làm (WIP)</h2>
+  <ul class="status-list">
+    <li class="wip"><span class="dot-status">!</span>Hoàn thiện Cloud Run / AlloyDB / Composer / Gemini connectors lên trạng thái GA.</li>
+    <li class="wip"><span class="dot-status">!</span>Mở rộng Service Catalog: thêm template Kafka, Elasticsearch, Object-Storage gateway.</li>
+    <li class="wip"><span class="dot-status">!</span>Bulk operation v2: streaming progress qua WebSocket cho UI realtime.</li>
+    <li class="wip"><span class="dot-status">!</span>SOAR playbook engine cho alert auto-remediation.</li>
+    <li class="wip"><span class="dot-status">!</span>Tăng cường audit: gửi event qua Kafka + lưu trữ off-site (S3 / GCS).</li>
+    <li class="wip"><span class="dot-status">!</span>Vai trò RBAC mới: <code>billing-readonly</code>, <code>security-auditor</code>, <code>support-l1</code>.</li>
+  </ul>
+
+  <h2>🗺 Kế hoạch (Planned)</h2>
+  <ul class="status-list">
+    <li class="todo-i"><span class="dot-status">·</span>Marketplace plug-in (template app từ đối tác, kiểu AWS Marketplace).</li>
+    <li class="todo-i"><span class="dot-status">·</span>Multi-region active-active cho management cluster (cross-DC).</li>
+    <li class="todo-i"><span class="dot-status">·</span>Mobile companion app (Android/iOS) cho admin: alert + smoke checks.</li>
+    <li class="todo-i"><span class="dot-status">·</span>Edge zone &amp; air-gapped deployment kit.</li>
+    <li class="todo-i"><span class="dot-status">·</span>Tích hợp AWS &amp; Azure tương đương GCP connectors (multi-cloud).</li>
+    <li class="todo-i"><span class="dot-status">·</span>Chaos engineering nightly (Chaos Mesh / Litmus) cho zone production.</li>
+    <li class="todo-i"><span class="dot-status">·</span>Self-service billing portal cho end-user (top-up, voucher, payment gateway VN).</li>
+  </ul>
+
+  <h2>📚 Tham chiếu</h2>
+  <ul>
+    <li><a href="VNSO_DOCUMENTS_INDEX.md">Index toàn bộ tài liệu VNSO</a></li>
+    <li><a href="GPU_CLOUD_SERVICE_ARCHITECTURE.md">GPU Cloud Service — Kiến trúc &amp; parity</a></li>
+    <li><a href="PLATFORM_VALIDATION_AUTOMATION.md">Platform Validation &amp; Security Automation</a></li>
+    <li><a href="BULK_1000_EC2_1000_SERVICES_DEPLOYMENT_GUIDE.md">Bulk 1000 EC2 / 1000 Services Deployment</a></li>
+    <li><a href="CLOUDSTACK_ZONE2_STABILIZATION_RUNBOOK.md">Zone-2 Stabilization Runbook</a></li>
+    <li><a href="SERVICE-CATALOG-GO-NO-GO-TEMPLATE.md">Service Catalog Go/No-Go Template</a></li>
+    <li><a href="../THREE-SERVER-DEPLOYMENT-PLAN.md">Three-server deployment plan</a></li>
+    <li><a href="../DEPLOYMENT-RUNBOOK-4-SERVERS.md">Four-server deployment runbook</a></li>
+  </ul>
+</main>
+
+<footer class="footer">© VNSO CloudStack — trạng thái cập nhật theo CI &amp; quality gates.</footer>
+</body>
+</html>
