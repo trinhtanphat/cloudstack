@@ -49,6 +49,27 @@
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
+## VNSO CloudStack — Bản phân phối thương mại hoá
+
+Đây là bản fork **VNSO CloudStack** (4.23.0.0-SNAPSHOT) của Apache CloudStack với các plugin và tài liệu mở rộng:
+
+- Plugins bổ sung: `gpu-service`, `dbaas-service`, `bulk-service`, `service-catalog`, `gcp-services` (22 connectors), `kubernetes-service`, `prometheus`, `cloudian`.
+- UI Vue 3 với chế độ **light/dark** (tương phản WCAG AA), i18n vi/en, sidebar GPU/DBaaS/BulkOps/Catalog.
+- Hardening Nginx: HSTS, CSP, X-Frame, X-Content-Type-Options, Referrer-Policy, Permissions-Policy.
+- Bộ script vận hành tại `scripts/vnso/`: smoke test, monitoring, pentest baseline, quality gates, key rotation.
+- Triển khai mẫu: Docker compose 1-node, 3-server và 4-server runbook.
+
+**Tài liệu landing page** (mở trực tiếp trong trình duyệt):
+
+- [docs/index.html](docs/index.html) — Tổng quan
+- [docs/features.html](docs/features.html) — Danh mục tính năng đầy đủ
+- [docs/architecture.html](docs/architecture.html) — Kiến trúc hệ thống
+- [docs/operations.html](docs/operations.html) — HA, hiệu năng, bảo mật, vận hành
+
+Index Markdown: [docs/VNSO_DOCUMENTS_INDEX.md](docs/VNSO_DOCUMENTS_INDEX.md).
+
+---
+
 Apache CloudStack is open source software designed to deploy and manage large
 networks of virtual machines, as a highly available, highly scalable
 Infrastructure as a Service (IaaS) cloud computing platform. CloudStack is used
