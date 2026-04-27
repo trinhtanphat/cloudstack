@@ -17,20 +17,19 @@ services:
     command:
       - |
         set -e
-        DB_HOST="${DB_HOST:-xiaozhi-esp32-server-db}"
-        DB_PORT="${DB_PORT:-3306}"
-        echo "[entrypoint] Waiting for ${DB_HOST}:${DB_PORT} ..."
-        for i in $(seq 1 90); do
-          if (exec 3<>/dev/tcp/${DB_HOST}/${DB_PORT}) 2>/dev/null; then
-            exec 3>&-; echo "[entrypoint] TCP ready (try ${i})"; break
+        DB_HOST="$${DB_HOST:-xiaozhi-esp32-server-db}"
+        DB_PORT="$${DB_PORT:-3306}"
+        echo "[entrypoint] Waiting for $${DB_HOST}:$${DB_PORT} ..."
+        for i in $$(seq 1 90); do
+          if (exec 3<>/dev/tcp/$${DB_HOST}/$${DB_PORT}) 2>/dev/null; then
+            exec 3>&-; echo "[entrypoint] TCP ready (try $${i})"; break
           fi
           sleep 2
         done
-        # Optional MySQL handshake check (skip if client missing or auth not ready)
         if command -v mysql >/dev/null 2>&1; then
-          for i in $(seq 1 60); do
-            if mysql -h "${DB_HOST}" -P "${DB_PORT}" -u"${DB_USER:-cloud}" -p"${DB_PASS:-cloud}" -e "SELECT 1" >/dev/null 2>&1; then
-              echo "[entrypoint] MySQL handshake OK (try ${i})"; break
+          for i in $$(seq 1 60); do
+            if mysql -h "$${DB_HOST}" -P "$${DB_PORT}" -u"$${DB_USER:-cloud}" -p"$${DB_PASS:-cloud}" -e "SELECT 1" >/dev/null 2>&1; then
+              echo "[entrypoint] MySQL handshake OK (try $${i})"; break
             fi
             sleep 2
           done
