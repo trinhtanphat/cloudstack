@@ -1,0 +1,220 @@
+<!doctype html>
+<html lang="vi" data-theme="">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>VNSO CloudStack — Workflows &amp; sơ đồ</title>
+<meta name="description" content="Sơ đồ kiến trúc, luồng vận hành, CI/CD release pipeline cho VNSO CloudStack." />
+<link rel="stylesheet" href="assets/style.css" />
+<link rel="stylesheet" href="assets/themes.css" />
+<script src="assets/theme.js" defer></script>
+<script src="assets/theme-picker.js" defer></script>
+<style>
+  .diagram { background: var(--bg-card); border:1px solid var(--border); border-radius: var(--radius);
+    padding: 18px; box-shadow: var(--shadow); overflow-x: auto; }
+  .diagram svg { display:block; max-width:100%; height:auto; }
+  .step-list { counter-reset: step; padding-left: 0; list-style: none; }
+  .step-list li { counter-increment: step; padding: 14px 16px; margin: 10px 0;
+    border:1px solid var(--border); border-radius: var(--radius);
+    background: var(--bg-card); position: relative; padding-left: 56px; }
+  .step-list li::before { content: counter(step); position:absolute; left: 14px; top: 12px;
+    width: 28px; height: 28px; border-radius: 50%;
+    background: var(--accent-strong); color: #fff; display: grid; place-items: center;
+    font-weight: 700; font-size: .9rem; }
+</style>
+</head>
+<body>
+<header class="site-header">
+  <div class="wrap">
+    <a class="brand" href="index.html"><span class="dot"></span> VNSO CloudStack</a>
+    <nav class="primary" aria-label="Primary">
+      <a href="index.html">Tổng quan</a>
+      <a href="features.html">Tính năng</a>
+      <a href="catalog.html">Catalog</a>
+      <a href="architecture.html">Kiến trúc</a>
+      <a href="clients.html">Clients</a>
+      <a href="gcp-integrations.html">GCP</a>
+      <a href="security.html">Bảo mật</a>
+      <a href="operations.html">Vận hành</a>
+      <a href="workflows.html" class="active">Workflows</a>
+      <a href="setup.html">Hướng dẫn</a>
+      <a href="roadmap.html">Roadmap</a>
+    </nav>
+    <span class="spacer"></span>
+    <button type="button" class="theme-toggle" aria-label="Toggle theme">☾ Dark</button>
+  </div>
+</header>
+
+<main class="wrap">
+  <h1>Workflows &amp; sơ đồ vận hành</h1>
+  <p class="muted">Sơ đồ kiến trúc, luồng nghiệp vụ chính, và CI/CD release pipeline.</p>
+
+  <h2>1. Kiến trúc tổng thể</h2>
+  <div class="diagram">
+    <svg viewBox="0 0 920 360" role="img" aria-label="Kiến trúc tổng thể VNSO CloudStack">
+      <defs>
+        <marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+          <path d="M0,0 L10,5 L0,10 z" fill="currentColor"/>
+        </marker>
+        <style>
+          .lbl{font:600 12px/1 system-ui;fill:var(--text)}
+          .sub{font:11px/1 system-ui;fill:var(--text-muted)}
+          .box{fill:var(--bg-card);stroke:var(--border-strong);stroke-width:1.2}
+          .box-accent{fill:var(--bg-elev);stroke:var(--accent);stroke-width:1.4}
+          .ln{stroke:var(--text-muted);stroke-width:1.4;fill:none}
+        </style>
+      </defs>
+      <!-- Clients -->
+      <rect class="box" x="20" y="20" width="180" height="60" rx="8"/>
+      <text class="lbl" x="110" y="46" text-anchor="middle">Clients</text>
+      <text class="sub" x="110" y="64" text-anchor="middle">Web · Mobile · Desktop · Ext · CLI</text>
+
+      <!-- Edge -->
+      <rect class="box-accent" x="240" y="20" width="180" height="60" rx="8"/>
+      <text class="lbl" x="330" y="46" text-anchor="middle">Nginx Edge</text>
+      <text class="sub" x="330" y="64" text-anchor="middle">TLS · HSTS · CSP · rate-limit</text>
+
+      <!-- Mgmt -->
+      <rect class="box-accent" x="460" y="20" width="200" height="60" rx="8"/>
+      <text class="lbl" x="560" y="46" text-anchor="middle">Management Cluster</text>
+      <text class="sub" x="560" y="64" text-anchor="middle">Java · Spring · Async Jobs · RBAC</text>
+
+      <!-- DB -->
+      <rect class="box" x="700" y="20" width="200" height="60" rx="8"/>
+      <text class="lbl" x="800" y="46" text-anchor="middle">MySQL InnoDB Cluster</text>
+      <text class="sub" x="800" y="64" text-anchor="middle">Group Replication · HA</text>
+
+      <!-- Plugins -->
+      <rect class="box" x="240" y="120" width="420" height="60" rx="8"/>
+      <text class="lbl" x="450" y="146" text-anchor="middle">Plugins</text>
+      <text class="sub" x="450" y="164" text-anchor="middle">gpu · dbaas · bulk · catalog · gcp · k8s · prometheus · cloudian</text>
+
+      <!-- Resource -->
+      <rect class="box" x="20" y="240" width="270" height="100" rx="8"/>
+      <text class="lbl" x="155" y="266" text-anchor="middle">Hypervisors</text>
+      <text class="sub" x="155" y="286" text-anchor="middle">KVM · VMware · Xen · Hyper-V · LXC</text>
+      <text class="sub" x="155" y="304" text-anchor="middle">SystemVM: VR / SSVM / Console Proxy</text>
+
+      <rect class="box" x="320" y="240" width="270" height="100" rx="8"/>
+      <text class="lbl" x="455" y="266" text-anchor="middle">Storage</text>
+      <text class="sub" x="455" y="286" text-anchor="middle">Primary: NFS · Ceph · iSCSI · Linstor</text>
+      <text class="sub" x="455" y="304" text-anchor="middle">Secondary: NFS · S3 · Cloudian</text>
+
+      <rect class="box" x="620" y="240" width="280" height="100" rx="8"/>
+      <text class="lbl" x="760" y="266" text-anchor="middle">Network</text>
+      <text class="sub" x="760" y="286" text-anchor="middle">Isolated · Shared · L2 · VPC</text>
+      <text class="sub" x="760" y="304" text-anchor="middle">VR (HAProxy) · Netscaler · F5 · BGP</text>
+
+      <!-- arrows -->
+      <g style="color:var(--text-muted)">
+        <line class="ln" x1="200" y1="50" x2="240" y2="50" marker-end="url(#arr)"/>
+        <line class="ln" x1="420" y1="50" x2="460" y2="50" marker-end="url(#arr)"/>
+        <line class="ln" x1="660" y1="50" x2="700" y2="50" marker-end="url(#arr)"/>
+        <line class="ln" x1="560" y1="80" x2="450" y2="120" marker-end="url(#arr)"/>
+        <line class="ln" x1="450" y1="180" x2="155" y2="240" marker-end="url(#arr)"/>
+        <line class="ln" x1="450" y1="180" x2="455" y2="240" marker-end="url(#arr)"/>
+        <line class="ln" x1="450" y1="180" x2="760" y2="240" marker-end="url(#arr)"/>
+      </g>
+    </svg>
+  </div>
+
+  <h2>2. Luồng deploy một VM</h2>
+  <ol class="step-list">
+    <li><strong>Client</strong> gọi <code>deployVirtualMachine</code> qua REST API (HMAC-SHA1 signature).</li>
+    <li><strong>Nginx</strong> kiểm TLS, áp <em>rate-limit</em>, forward về Management cluster.</li>
+    <li><strong>Management Server</strong> xác thực API key, kiểm RBAC, ghi <code>async_job</code>, trả <code>jobid</code>.</li>
+    <li><strong>Resource Manager</strong> chọn host (capacity + affinity), reserve resource trong DB.</li>
+    <li><strong>Hypervisor agent</strong> nhận <code>StartCommand</code>, tạo VM (libvirt/vSphere SDK/...).</li>
+    <li><strong>SystemVM (VR)</strong> cấu hình DHCP/DNS/firewall cho guest network.</li>
+    <li><strong>Usage service</strong> ghi event để billing/quota tính tiền.</li>
+    <li>Client poll <code>queryAsyncJobResult</code> → trạng thái <em>SUCCEEDED</em> + IP/credentials.</li>
+  </ol>
+
+  <h2>3. CI/CD release pipeline</h2>
+  <div class="diagram">
+    <svg viewBox="0 0 880 220" role="img" aria-label="CI/CD release pipeline">
+      <defs>
+        <marker id="arr2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+          <path d="M0,0 L10,5 L0,10 z" fill="currentColor"/>
+        </marker>
+        <style>
+          .lbl{font:600 12px/1 system-ui;fill:var(--text)}
+          .sub{font:11px/1 system-ui;fill:var(--text-muted)}
+          .box{fill:var(--bg-card);stroke:var(--border-strong);stroke-width:1.2}
+          .ln{stroke:var(--accent);stroke-width:1.6;fill:none}
+        </style>
+      </defs>
+      <rect class="box" x="20" y="20" width="170" height="60" rx="8"/>
+      <text class="lbl" x="105" y="46" text-anchor="middle">git tag clients-vX.Y.Z</text>
+      <text class="sub" x="105" y="64" text-anchor="middle">push origin tag</text>
+
+      <rect class="box" x="230" y="20" width="170" height="60" rx="8"/>
+      <text class="lbl" x="315" y="46" text-anchor="middle">Build matrix</text>
+      <text class="sub" x="315" y="64" text-anchor="middle">linux · macOS · win · android · ios · ext · web</text>
+
+      <rect class="box" x="440" y="20" width="170" height="60" rx="8"/>
+      <text class="lbl" x="525" y="46" text-anchor="middle">Artifacts</text>
+      <text class="sub" x="525" y="64" text-anchor="middle">AppImage·dmg·exe·apk·ipa·zip·tgz</text>
+
+      <rect class="box" x="650" y="20" width="210" height="60" rx="8"/>
+      <text class="lbl" x="755" y="46" text-anchor="middle">GitHub Release</text>
+      <text class="sub" x="755" y="64" text-anchor="middle">tag · notes · download links</text>
+
+      <rect class="box" x="230" y="130" width="170" height="60" rx="8"/>
+      <text class="lbl" x="315" y="156" text-anchor="middle">vnso-quality-gates</text>
+      <text class="sub" x="315" y="174" text-anchor="middle">lint · unit · smoke</text>
+
+      <rect class="box" x="440" y="130" width="170" height="60" rx="8"/>
+      <text class="lbl" x="525" y="156" text-anchor="middle">codeql + license</text>
+      <text class="sub" x="525" y="174" text-anchor="middle">SAST · RAT</text>
+
+      <g style="color:var(--accent)">
+        <line class="ln" x1="190" y1="50" x2="230" y2="50" marker-end="url(#arr2)"/>
+        <line class="ln" x1="400" y1="50" x2="440" y2="50" marker-end="url(#arr2)"/>
+        <line class="ln" x1="610" y1="50" x2="650" y2="50" marker-end="url(#arr2)"/>
+        <line class="ln" x1="315" y1="80" x2="315" y2="130" marker-end="url(#arr2)"/>
+        <line class="ln" x1="525" y1="80" x2="525" y2="130" marker-end="url(#arr2)"/>
+      </g>
+    </svg>
+  </div>
+
+  <h3>Cách phát hành bản mới</h3>
+  <ol class="step-list">
+    <li>Cập nhật <code>version</code> ở <code>desktop/package.json</code>, <code>mobile/package.json</code>, <code>extension/manifest.json</code>.</li>
+    <li>Tạo tag: <code>git tag clients-v1.0.1 &amp;&amp; git push origin clients-v1.0.1</code>.</li>
+    <li>Workflow <code>.github/workflows/release-clients.yml</code> tự build &amp; upload tất cả nền tảng.</li>
+    <li>Mở GitHub Releases, kiểm các tệp <code>.AppImage</code> / <code>.dmg</code> / <code>.exe</code> / <code>.apk</code> / <code>.zip</code> / <code>.tar.gz</code>.</li>
+    <li>(Tuỳ chọn) Bật biến <code>IOS_BUILD_ENABLED=true</code> trong repo variables để build IPA.</li>
+  </ol>
+
+  <h2>4. Luồng bulk deploy 1000 VM</h2>
+  <ol class="step-list">
+    <li>Người dùng tải file YAML/JSON spec, chọn template + zone + offering.</li>
+    <li>Plugin <code>bulk-service</code> chia batch (mặc định 50/lô), đẩy vào worker pool.</li>
+    <li>Mỗi worker gọi <code>deployVirtualMachine</code> với retry exponential (3 lần, 1s/3s/9s).</li>
+    <li>UI <code>BulkJobProgress.vue</code> theo dõi qua polling <code>listCatalogDeploymentStatus</code>.</li>
+    <li>Khi tỉ lệ lỗi &gt; ngưỡng (ví dụ 20%), batch tự rollback VM đã tạo.</li>
+    <li>Báo cáo kết quả: số ok/fail, tổng wall-time, P95 latency, link CSV usage.</li>
+  </ol>
+
+  <h2>5. Luồng quên mật khẩu</h2>
+  <ol class="step-list">
+    <li>Người dùng nhấn <em>Quên mật khẩu</em> trên màn hình đăng nhập.</li>
+    <li>UI gọi <code>forgotPassword</code>, người dùng nhập username + email.</li>
+    <li>Management Server tạo token một lần, gửi link <code>reset-password?token=...</code> qua SMTP.</li>
+    <li>Người dùng mở link → nhập mật khẩu mới (≥ 12 ký tự, qua zxcvbn check).</li>
+    <li>Token bị huỷ; sự kiện log vào bảng <code>cloud.event</code> để audit.</li>
+  </ol>
+
+  <h2>6. Disaster Recovery</h2>
+  <ol class="step-list">
+    <li>Backup MySQL hằng ngày bằng xtrabackup → S3 (Cloudian / GCS).</li>
+    <li>Secondary storage replicate cross-zone (rclone hoặc rsync over WireGuard).</li>
+    <li>Diễn tập restore staging hằng tháng — runbook ở <a href="CLOUDSTACK_ZONE2_STABILIZATION_RUNBOOK.md">Zone-2 Stabilization Runbook</a>.</li>
+    <li>RTO mục tiêu &lt; 4h, RPO &lt; 24h cho deploy production.</li>
+  </ol>
+</main>
+
+<footer class="footer">© VNSO CloudStack — Apache License 2.0.</footer>
+</body>
+</html>

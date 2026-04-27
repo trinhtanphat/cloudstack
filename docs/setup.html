@@ -1,0 +1,257 @@
+<!doctype html>
+<html lang="vi" data-theme="">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>VNSO CloudStack — Hướng dẫn cài đặt &amp; sử dụng</title>
+<meta name="description" content="Hướng dẫn step-by-step: cài đặt management cluster, hypervisor, cấu hình mạng/lưu trữ, dùng Web UI, mobile, desktop, extension." />
+<link rel="stylesheet" href="assets/style.css" />
+<link rel="stylesheet" href="assets/themes.css" />
+<script src="assets/theme.js" defer></script>
+<script src="assets/theme-picker.js" defer></script>
+<style>
+  details { background: var(--bg-card); border:1px solid var(--border); border-radius: var(--radius);
+    padding: 14px 18px; margin: 10px 0; }
+  details > summary { cursor: pointer; font-weight: 600; font-size: 1.02rem; }
+  details[open] { box-shadow: var(--shadow); }
+  .toc { background: var(--bg-elev); padding: 14px 18px; border:1px solid var(--border); border-radius: var(--radius); }
+  .toc ol { columns: 2; column-gap: 28px; padding-left: 18px; margin: 0; }
+  @media (max-width: 700px) { .toc ol { columns: 1; } }
+</style>
+</head>
+<body>
+<header class="site-header">
+  <div class="wrap">
+    <a class="brand" href="index.html"><span class="dot"></span> VNSO CloudStack</a>
+    <nav class="primary" aria-label="Primary">
+      <a href="index.html">Tổng quan</a>
+      <a href="features.html">Tính năng</a>
+      <a href="catalog.html">Catalog</a>
+      <a href="architecture.html">Kiến trúc</a>
+      <a href="clients.html">Clients</a>
+      <a href="gcp-integrations.html">GCP</a>
+      <a href="security.html">Bảo mật</a>
+      <a href="operations.html">Vận hành</a>
+      <a href="workflows.html">Workflows</a>
+      <a href="setup.html" class="active">Hướng dẫn</a>
+      <a href="roadmap.html">Roadmap</a>
+    </nav>
+    <span class="spacer"></span>
+    <button type="button" class="theme-toggle" aria-label="Toggle theme">☾ Dark</button>
+  </div>
+</header>
+
+<main class="wrap">
+  <h1>Hướng dẫn cài đặt &amp; sử dụng</h1>
+  <p class="muted">Tham chiếu nhanh các bước triển khai. Bấm vào từng phần để mở chi tiết.</p>
+
+  <nav class="toc" aria-label="Mục lục">
+    <ol>
+      <li><a href="#req">Yêu cầu hệ thống</a></li>
+      <li><a href="#mgmt">Cài Management Server</a></li>
+      <li><a href="#db">Khởi tạo MySQL InnoDB Cluster</a></li>
+      <li><a href="#kvm">Thêm host KVM</a></li>
+      <li><a href="#zone">Tạo Zone / Pod / Cluster</a></li>
+      <li><a href="#storage">Cấu hình Primary/Secondary storage</a></li>
+      <li><a href="#network">Cấu hình mạng (Isolated/VPC)</a></li>
+      <li><a href="#deploy">Deploy VM đầu tiên</a></li>
+      <li><a href="#admin">Đăng nhập admin &amp; rotate API key</a></li>
+      <li><a href="#tls">Bật TLS &amp; security headers</a></li>
+      <li><a href="#mobile">Build &amp; cài Mobile</a></li>
+      <li><a href="#desktop">Build &amp; cài Desktop</a></li>
+      <li><a href="#ext">Cài Browser Extension</a></li>
+      <li><a href="#release">Phát hành bản client mới</a></li>
+      <li><a href="#troubleshoot">Troubleshooting</a></li>
+    </ol>
+  </nav>
+
+  <details id="req" open>
+    <summary>1. Yêu cầu hệ thống</summary>
+    <ul>
+      <li>Management server: 8 vCPU / 16 GB RAM / 100 GB SSD; Ubuntu 22.04 hoặc Rocky 9.</li>
+      <li>MySQL: 8 vCPU / 32 GB RAM / 500 GB NVMe (cluster 3 node nếu HA).</li>
+      <li>Hypervisor KVM: 16+ vCPU / 64+ GB RAM, NIC ≥ 10 Gbps, /var/lib/libvirt ≥ 200 GB.</li>
+      <li>Primary storage: NFS hoặc Ceph RBD (latency &lt; 5 ms).</li>
+      <li>Secondary storage: NFS hoặc S3-compatible (Cloudian).</li>
+      <li>Mạng quản lý + storage tách VLAN; jumbo frame (MTU 9000) khuyến nghị.</li>
+    </ul>
+  </details>
+
+  <details id="mgmt">
+    <summary>2. Cài Management Server (Docker compose)</summary>
+<pre><code>cd /opt &amp;&amp; git clone https://github.com/trinhtanphat/cloudstack.git
+cd cloudstack &amp;&amp; cp docker-compose.prod.yml docker-compose.yml
+docker compose up -d
+# Tài khoản admin mặc định: admin / Admin@@3224@@ (đổi ngay sau lần đầu đăng nhập)
+docker compose logs -f management | tail -200</code></pre>
+    <p>Triển khai 3-server / 4-server: xem <a href="../THREE-SERVER-DEPLOYMENT-PLAN.md">THREE-SERVER-DEPLOYMENT-PLAN.md</a>
+       và <a href="../DEPLOYMENT-RUNBOOK-4-SERVERS.md">DEPLOYMENT-RUNBOOK-4-SERVERS.md</a>.</p>
+  </details>
+
+  <details id="db">
+    <summary>3. Khởi tạo MySQL InnoDB Cluster (HA)</summary>
+<pre><code># Trên 3 node MySQL
+mysqlsh --uri root@node1 -- dba configure-instance --interactive=false
+mysqlsh --uri root@node1 -- dba create-cluster vnso \
+  --adopt-from-gr=false --multi-primary=false
+mysqlsh --uri root@node1 -- cluster add-instance node2 --recovery-method=clone
+mysqlsh --uri root@node1 -- cluster add-instance node3 --recovery-method=clone
+
+# Trên management node
+sed -i 's/db.cloud.host=.*/db.cloud.host=mysql-router/' /etc/cloudstack/management/db.properties
+systemctl restart cloudstack-management</code></pre>
+  </details>
+
+  <details id="kvm">
+    <summary>4. Thêm host KVM</summary>
+<pre><code>apt install -y cloudstack-agent qemu-kvm libvirt-daemon-system
+echo "host=mgmt.vnso.vn" &gt;&gt; /etc/cloudstack/agent/agent.properties
+systemctl restart cloudstack-agent
+# UI: Infrastructure → Hosts → Add Host → KVM → IP + root password</code></pre>
+  </details>
+
+  <details id="zone">
+    <summary>5. Tạo Zone / Pod / Cluster (Advanced networking)</summary>
+    <ol>
+      <li>UI → <em>Infrastructure</em> → <em>Zones</em> → <em>Add Zone</em>.</li>
+      <li>Chọn <strong>Advanced</strong> với security group hoặc Isolated.</li>
+      <li>Nhập DNS, internal DNS, network domain.</li>
+      <li>Khai báo physical network: management / public / guest / storage.</li>
+      <li>Thêm Pod: gateway, netmask, IP range cho management.</li>
+      <li>Thêm Cluster (KVM/VMware), gán host.</li>
+      <li>Thêm Primary storage và Secondary storage.</li>
+      <li>Bật zone — chờ SystemVM (SSVM, CPVM) lên trạng thái <em>Running</em>.</li>
+    </ol>
+  </details>
+
+  <details id="storage">
+    <summary>6. Cấu hình Primary/Secondary storage</summary>
+<pre><code># Primary NFS:
+mount -t nfs storage.vnso.vn:/export/primary /mnt/primary
+# UI: Add Primary → Server: storage.vnso.vn → Path: /export/primary
+
+# Secondary NFS:
+mount -t nfs storage.vnso.vn:/export/secondary /mnt/secondary
+# UI: Add Secondary → URL: nfs://storage.vnso.vn/export/secondary</code></pre>
+    <p>Ceph RBD: tham khảo <a href="https://docs.cloudstack.apache.org">docs.cloudstack.apache.org</a>; tạo pool riêng (replica 3) và import bằng UUID.</p>
+  </details>
+
+  <details id="network">
+    <summary>7. Cấu hình mạng (Isolated &amp; VPC)</summary>
+    <ol>
+      <li>Tạo Network Offering với LB + Firewall + Source NAT (VR-based).</li>
+      <li>Account user → <em>Network</em> → <em>Add Guest Network</em>.</li>
+      <li>VPC: chia tier (web/app/db), gắn ACL ingress/egress riêng.</li>
+      <li>Site-to-site VPN: <em>Network</em> → <em>VPN</em> → <em>Site-to-Site</em>.</li>
+      <li>Public IP &amp; PF: <em>Network</em> → <em>Public IPs</em> → <em>Configuration</em> → <em>Port Forwarding</em>.</li>
+    </ol>
+  </details>
+
+  <details id="deploy">
+    <summary>8. Deploy VM đầu tiên</summary>
+    <ol>
+      <li>UI → <em>Compute</em> → <em>Instances</em> → <em>Add Instance</em>.</li>
+      <li>Chọn template (Ubuntu/Rocky/Debian); chọn service offering.</li>
+      <li>Chọn network; nhấn <em>Launch VM</em>.</li>
+      <li>Khi state <em>Running</em>, lấy IP/console qua nút <em>VNC</em>.</li>
+      <li>SSH: <code>ssh root@&lt;public-ip&gt;</code> (mật khẩu nhận trong tab <em>Notifications</em>).</li>
+    </ol>
+  </details>
+
+  <details id="admin">
+    <summary>9. Đăng nhập admin &amp; rotate API key</summary>
+<pre><code># Tài khoản mặc định
+URL:  https://manage.example.vn/client
+User: admin
+Pass: Admin@@3224@@   # đổi ngay sau lần đầu đăng nhập
+
+# Rotate API key tự động
+bash scripts/vnso/rotate-admin-api-key.sh \
+     --user admin --account admin --domain ROOT</code></pre>
+  </details>
+
+  <details id="tls">
+    <summary>10. Bật TLS &amp; security headers</summary>
+<pre><code># Sao chép snippet hardening
+sudo cp scripts/vnso/nginx/vnso-cloudstack-hardening.conf  /etc/nginx/conf.d/
+sudo cp scripts/vnso/nginx/vnso-cloudstack-headers.inc      /etc/nginx/conf.d/
+sudo cp scripts/vnso/nginx/vnso-cloudstack-locations.example.conf \
+        /etc/nginx/conf.d/vnso-cloudstack.conf
+
+sudo certbot --nginx -d manage.example.vn -d docs-cloudstack.vnso.vn
+sudo nginx -t &amp;&amp; sudo systemctl reload nginx</code></pre>
+    <p>Kiểm tra: <a href="https://securityheaders.com">securityheaders.com</a> phải đạt ≥ A.</p>
+  </details>
+
+  <details id="mobile">
+    <summary>11. Build &amp; cài Mobile (Android/iOS)</summary>
+<pre><code>cd mobile
+npm install
+VNSO_MGMT_URL=https://manage.example.vn npm run build:web
+npx cap add android        # lần đầu
+npx cap add ios            # lần đầu (chỉ macOS)
+npm run sync
+npm run open:android       # mở Android Studio
+npm run open:ios           # mở Xcode</code></pre>
+    <p>APK release tự build qua workflow <code>release-clients.yml</code> — xem <a href="workflows.html#3.-ci/cd-release-pipeline">CI/CD pipeline</a>.</p>
+  </details>
+
+  <details id="desktop">
+    <summary>12. Build &amp; cài Desktop</summary>
+<pre><code>cd desktop
+npm install
+npm start                 # chạy thử
+npm run build:linux       # AppImage + deb
+npm run build:mac         # dmg (chỉ macOS)
+npm run build:win         # nsis (chỉ Windows)</code></pre>
+  </details>
+
+  <details id="ext">
+    <summary>13. Cài Browser Extension</summary>
+    <ol>
+      <li>Mở <code>chrome://extensions</code> hoặc <code>edge://extensions</code>.</li>
+      <li>Bật <em>Developer mode</em>.</li>
+      <li>Nhấn <em>Load unpacked</em> → chọn thư mục <code>extension/</code>.</li>
+      <li>Mở popup → <em>Cấu hình</em> → URL + API key/secret.</li>
+    </ol>
+    <p>Phiên bản đóng gói chính thức: tải <code>vnso-cloudstack-extension-*.zip</code> ở GitHub Releases.</p>
+  </details>
+
+  <details id="release">
+    <summary>14. Phát hành bản client mới</summary>
+<pre><code># 1. Bump version
+jq '.version = "1.0.1"' desktop/package.json | sponge desktop/package.json
+jq '.version = "1.0.1"' mobile/package.json  | sponge mobile/package.json
+jq '.version = "1.0.1"' extension/manifest.json | sponge extension/manifest.json
+
+# 2. Commit + tag
+git commit -am "release: clients-v1.0.1"
+git tag clients-v1.0.1
+git push origin vnso clients-v1.0.1
+
+# 3. Workflow .github/workflows/release-clients.yml chạy:
+#    - Build desktop (Linux/macOS/Windows)
+#    - Build Android APK (iOS IPA nếu IOS_BUILD_ENABLED=true)
+#    - Build extension zip
+#    - Build web UI tarball
+#    - Tạo GitHub Release với tất cả artifact</code></pre>
+  </details>
+
+  <details id="troubleshoot">
+    <summary>15. Troubleshooting nhanh</summary>
+    <table>
+      <thead><tr><th>Triệu chứng</th><th>Kiểm tra</th></tr></thead>
+      <tbody>
+        <tr><td>SystemVM kẹt <em>Starting</em></td><td>Volume root tồn tại? <code>storage_pool</code> đúng primary? Xem <a href="CLOUDSTACK_ZONE2_STABILIZATION_RUNBOOK.md">Zone-2 runbook</a>.</td></tr>
+        <tr><td>Login 401 lặp lại</td><td>API key/secret đúng? Đồng hồ host lệch &gt; 5 phút?</td></tr>
+        <tr><td>UI trắng</td><td>Build chưa: <code>cd ui &amp;&amp; npm run build</code> hoặc cache CDN cũ.</td></tr>
+        <tr><td>Forgot password không gửi email</td><td>Kiểm SMTP trong <em>Global settings</em>: <code>email.*</code>.</td></tr>
+        <tr><td>Bulk deploy chậm</td><td>Tăng worker pool <code>bulk.parallelism</code>; kiểm DB <code>max_connections</code>.</td></tr>
+      </tbody>
+    </table>
+  </details>
+</main>
+
+<footer class="footer">© VNSO CloudStack — Apache License 2.0.</footer>
+</body>
+</html>

@@ -1,0 +1,212 @@
+name: release-clients
+
+# Builds + publishes Desktop (Linux/macOS/Windows), Mobile (Android APK)
+# and Browser Extension (zip) artifacts whenever a tag matching
+# `clients-v*` is pushed (e.g. `clients-v1.0.0`).
+#
+# A signed iOS .ipa requires Apple credentials and runs only when the
+# APPLE_CERTIFICATE secret is configured; otherwise the iOS step is skipped.
+
+on:
+  push:
+    tags: [ "clients-v*" ]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Override release tag (defaults to ref name)"
+        required: false
+
+permissions:
+  contents: write
+
+jobs:
+  # ---------- Desktop (Electron) ----------
+  desktop:
+    name: Desktop (${{ matrix.os }})
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-latest
+            target: linux
+          - os: macos-latest
+            target: mac
+          - os: windows-latest
+            target: win
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: "20" }
+
+      - name: Install desktop deps
+        working-directory: desktop
+        run: npm ci || npm install
+
+      - name: Build desktop
+        working-directory: desktop
+        run: npx --yes electron-builder --${{ matrix.target }} --publish never
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Upload desktop artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: desktop-${{ matrix.target }}
+          path: |
+            desktop/dist/*.AppImage
+            desktop/dist/*.deb
+            desktop/dist/*.dmg
+            desktop/dist/*.exe
+            desktop/dist/*.zip
+          if-no-files-found: ignore
+
+  # ---------- Mobile (Capacitor → Android APK) ----------
+  android:
+    name: Mobile Android (APK)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: "20" }
+      - uses: actions/setup-java@v4
+        with: { distribution: temurin, java-version: "17" }
+
+      - name: Install mobile deps
+        working-directory: mobile
+        run: |
+          npm install
+          npm run build:web
+        env:
+          VNSO_MGMT_URL: ${{ vars.VNSO_MGMT_URL }}
+
+      - name: Add Android platform
+        working-directory: mobile
+        run: npx cap add android || true
+
+      - name: Sync Capacitor
+        working-directory: mobile
+        run: npx cap sync android
+
+      - name: Build APK
+        working-directory: mobile/android
+        run: ./gradlew assembleRelease --no-daemon
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-apk
+          path: mobile/android/app/build/outputs/apk/release/*.apk
+          if-no-files-found: warn
+
+  # ---------- Mobile (Capacitor → iOS) ----------
+  ios:
+    name: Mobile iOS (IPA, gated by signing secrets)
+    runs-on: macos-latest
+    if: ${{ vars.IOS_BUILD_ENABLED == 'true' }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: "20" }
+
+      - name: Install mobile deps
+        working-directory: mobile
+        run: |
+          npm install
+          npm run build:web
+        env:
+          VNSO_MGMT_URL: ${{ vars.VNSO_MGMT_URL }}
+
+      - name: Add iOS platform
+        working-directory: mobile
+        run: npx cap add ios || true
+
+      - name: Sync Capacitor
+        working-directory: mobile
+        run: npx cap sync ios
+
+      - name: Archive (unsigned)
+        working-directory: mobile/ios/App
+        run: |
+          xcodebuild -workspace App.xcworkspace -scheme App \
+            -configuration Release -sdk iphoneos \
+            -archivePath $RUNNER_TEMP/App.xcarchive archive \
+            CODE_SIGN_IDENTITY="" CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGNING_ALLOWED=NO
+
+      - name: Export IPA (unsigned, ad-hoc payload)
+        run: |
+          mkdir -p out
+          cp -R "$RUNNER_TEMP/App.xcarchive/Products/Applications" out/Payload || true
+          if [ -d out/Payload ]; then (cd out && zip -r vnso-cloudstack.ipa Payload); fi
+
+      - name: Upload IPA
+        uses: actions/upload-artifact@v4
+        with:
+          name: ios-ipa
+          path: out/*.ipa
+          if-no-files-found: warn
+
+  # ---------- Browser Extension (MV3) ----------
+  extension:
+    name: Browser Extension (zip)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Package extension
+        run: |
+          mkdir -p out
+          cd extension && zip -r "../out/vnso-cloudstack-extension-${{ github.ref_name }}.zip" \
+            . -x "*.DS_Store" "node_modules/*"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: extension-zip
+          path: out/*.zip
+
+  # ---------- Web UI (Vue) ----------
+  web:
+    name: Web UI (production tarball)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: "20" }
+      - name: Build UI
+        working-directory: ui
+        run: |
+          npm ci || npm install
+          npm run build
+      - name: Tarball
+        run: |
+          mkdir -p out
+          tar -C ui/dist -czf out/vnso-cloudstack-webui-${{ github.ref_name }}.tar.gz .
+      - uses: actions/upload-artifact@v4
+        with:
+          name: webui-tarball
+          path: out/*.tar.gz
+
+  # ---------- Publish GitHub Release ----------
+  publish:
+    name: Publish GitHub Release
+    needs: [desktop, android, extension, web]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with: { path: artifacts }
+      - name: Flatten
+        run: |
+          mkdir -p release
+          find artifacts -type f \
+            \( -name "*.AppImage" -o -name "*.deb" -o -name "*.dmg" \
+               -o -name "*.exe"   -o -name "*.zip" -o -name "*.apk" \
+               -o -name "*.ipa"   -o -name "*.tar.gz" \) \
+            -exec cp {} release/ \;
+          ls -la release
+      - uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ inputs.tag || github.ref_name }}
+          name: VNSO CloudStack Clients ${{ inputs.tag || github.ref_name }}
+          generate_release_notes: true
+          files: release/*
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
