@@ -1,0 +1,585 @@
+/* ============================================================
+   ProxmoxAI Docs · Theme Pack
+   Activated by <html data-theme="..."> set from JS.
+   Re-uses base palette in style.css (--bg, --bg-card, --bg-surface,
+   --text, --text-muted, --border, --primary).
+   ============================================================ */
+
+/* ─── ANTHROPIC (warm dark, cream accent — Claude.ai vibe) ─── */
+html[data-theme="anthropic"] {
+  --bg: #1f1e1d;
+  --bg-card: #2a2725;
+  --bg-card-hover: #322f2c;
+  --bg-surface: #262320;
+  --text: #f5f1e8;
+  --text-muted: #c4bcb0;
+  --text-dim: #8a8378;
+  --border: #3d3833;
+  --border-light: #4a443e;
+  --primary: #d97706;
+  --primary-light: #f59e0b;
+  --primary-dark: #b45309;
+  --gradient-hero: linear-gradient(135deg, #1f1e1d 0%, #2a2520 50%, #1f1e1d 100%);
+}
+
+/* ─── ANTHROPIC LIGHT ─── */
+html[data-theme="anthropic-light"] {
+  --bg: #faf7f2;
+  --bg-card: #ffffff;
+  --bg-card-hover: #f5f0e8;
+  --bg-surface: #f1ebe1;
+  --text: #1f1e1d;
+  --text-muted: #57534e;
+  --text-dim: #78716c;
+  --border: #e7e0d3;
+  --border-light: #d6cdbf;
+  --primary: #c2410c;
+  --primary-light: #ea580c;
+  --primary-dark: #9a3412;
+  --gradient-hero: linear-gradient(135deg, #faf7f2 0%, #f5ede0 50%, #faf7f2 100%);
+}
+
+/* ─── DRACULA ─── */
+html[data-theme="dracula"] {
+  --bg: #282a36;
+  --bg-card: #313340;
+  --bg-card-hover: #44475a;
+  --bg-surface: #2d2f3b;
+  --text: #f8f8f2;
+  --text-muted: #bd93f9;
+  --text-dim: #6272a4;
+  --border: #44475a;
+  --border-light: #6272a4;
+  --primary: #ff79c6;
+  --primary-light: #ff92d0;
+  --primary-dark: #d65cb1;
+  --accent: #50fa7b;
+  --accent2: #8be9fd;
+  --gradient-hero: linear-gradient(135deg, #282a36 0%, #44275a 50%, #282a36 100%);
+}
+
+/* ─── NORD ─── */
+html[data-theme="nord"] {
+  --bg: #2e3440;
+  --bg-card: #3b4252;
+  --bg-card-hover: #434c5e;
+  --bg-surface: #353b48;
+  --text: #eceff4;
+  --text-muted: #d8dee9;
+  --text-dim: #81a1c1;
+  --border: #4c566a;
+  --border-light: #5e6779;
+  --primary: #88c0d0;
+  --primary-light: #8fbcbb;
+  --primary-dark: #5e81ac;
+  --accent: #a3be8c;
+  --gradient-hero: linear-gradient(135deg, #2e3440 0%, #3b4663 50%, #2e3440 100%);
+}
+
+/* ─── TOKYO NIGHT ─── */
+html[data-theme="tokyo-night"] {
+  --bg: #1a1b26;
+  --bg-card: #24283b;
+  --bg-card-hover: #2f334d;
+  --bg-surface: #1f2335;
+  --text: #c0caf5;
+  --text-muted: #a9b1d6;
+  --text-dim: #565f89;
+  --border: #292e42;
+  --border-light: #3b4261;
+  --primary: #7aa2f7;
+  --primary-light: #9ece6a;
+  --primary-dark: #5e7bd9;
+  --accent: #bb9af7;
+  --gradient-hero: linear-gradient(135deg, #1a1b26 0%, #24283b 50%, #1a1b26 100%);
+}
+
+/* ─── CATPPUCCIN MOCHA ─── */
+html[data-theme="catppuccin"] {
+  --bg: #1e1e2e;
+  --bg-card: #313244;
+  --bg-card-hover: #45475a;
+  --bg-surface: #181825;
+  --text: #cdd6f4;
+  --text-muted: #bac2de;
+  --text-dim: #7f849c;
+  --border: #45475a;
+  --border-light: #585b70;
+  --primary: #f5c2e7;
+  --primary-light: #f5e0dc;
+  --primary-dark: #cba6f7;
+  --accent: #94e2d5;
+  --gradient-hero: linear-gradient(135deg, #1e1e2e 0%, #302d41 50%, #1e1e2e 100%);
+}
+
+/* ─── GRUVBOX DARK ─── */
+html[data-theme="gruvbox"] {
+  --bg: #282828;
+  --bg-card: #32302f;
+  --bg-card-hover: #3c3836;
+  --bg-surface: #1d2021;
+  --text: #ebdbb2;
+  --text-muted: #d5c4a1;
+  --text-dim: #a89984;
+  --border: #504945;
+  --border-light: #665c54;
+  --primary: #fe8019;
+  --primary-light: #fabd2f;
+  --primary-dark: #d65d0e;
+  --accent: #b8bb26;
+  --gradient-hero: linear-gradient(135deg, #282828 0%, #3c2f28 50%, #282828 100%);
+}
+
+/* ─── GITHUB LIGHT ─── */
+html[data-theme="github-light"] {
+  --bg: #ffffff;
+  --bg-card: #f6f8fa;
+  --bg-card-hover: #eaeef2;
+  --bg-surface: #f1f4f8;
+  --text: #1f2328;
+  --text-muted: #656d76;
+  --text-dim: #8c959f;
+  --border: #d0d7de;
+  --border-light: #d8dee4;
+  --primary: #0969da;
+  --primary-light: #218bff;
+  --primary-dark: #0550ae;
+  --gradient-hero: linear-gradient(135deg, #ffffff 0%, #eaf2fa 50%, #ffffff 100%);
+}
+
+/* ─── GITHUB DIMMED ─── */
+html[data-theme="github-dim"] {
+  --bg: #22272e;
+  --bg-card: #2d333b;
+  --bg-card-hover: #373e47;
+  --bg-surface: #1c2128;
+  --text: #adbac7;
+  --text-muted: #909dab;
+  --text-dim: #768390;
+  --border: #444c56;
+  --border-light: #545d68;
+  --primary: #539bf5;
+  --primary-light: #6cb6ff;
+  --primary-dark: #316dca;
+  --gradient-hero: linear-gradient(135deg, #22272e 0%, #2d3845 50%, #22272e 100%);
+}
+
+/* ─── SOLARIZED DARK ─── */
+html[data-theme="solarized"] {
+  --bg: #002b36;
+  --bg-card: #073642;
+  --bg-card-hover: #0e4b58;
+  --bg-surface: #001f27;
+  --text: #fdf6e3;
+  --text-muted: #93a1a1;
+  --text-dim: #586e75;
+  --border: #0e4b58;
+  --border-light: #195867;
+  --primary: #cb4b16;
+  --primary-light: #dc6034;
+  --primary-dark: #a83a10;
+  --accent: #2aa198;
+  --gradient-hero: linear-gradient(135deg, #002b36 0%, #052b3f 50%, #002b36 100%);
+}
+
+/* ─── MONOKAI ─── */
+html[data-theme="monokai"] {
+  --bg: #272822;
+  --bg-card: #3e3d32;
+  --bg-card-hover: #49483e;
+  --bg-surface: #1e1f1c;
+  --text: #f8f8f2;
+  --text-muted: #cfcfc2;
+  --text-dim: #75715e;
+  --border: #49483e;
+  --border-light: #5a5950;
+  --primary: #f92672;
+  --primary-light: #fd5c8c;
+  --primary-dark: #c11962;
+  --accent: #a6e22e;
+  --gradient-hero: linear-gradient(135deg, #272822 0%, #312f23 50%, #272822 100%);
+}
+
+/* ─── CYBERPUNK (neon pink + cyan, dark) ─── */
+html[data-theme="cyberpunk"] {
+  --bg: #0a0014;
+  --bg-card: #1a0a2e;
+  --bg-card-hover: #2a1a4a;
+  --bg-surface: #110522;
+  --text: #f0f0ff;
+  --text-muted: #c0a0ff;
+  --text-dim: #8060c0;
+  --border: #ff00aa;
+  --border-light: #00ffff;
+  --primary: #ff006e;
+  --primary-light: #ff3a8a;
+  --primary-dark: #c0044f;
+  --accent: #00ffff;
+  --accent2: #ffff00;
+  --gradient-hero: linear-gradient(135deg, #0a0014 0%, #2a0044 50%, #0a0014 100%);
+}
+
+/* ─── MATRIX (terminal green on black) ─── */
+html[data-theme="matrix"] {
+  --bg: #000000;
+  --bg-card: #0a1f0a;
+  --bg-card-hover: #122e12;
+  --bg-surface: #051405;
+  --text: #00ff41;
+  --text-muted: #00cc33;
+  --text-dim: #007020;
+  --border: #003315;
+  --border-light: #006622;
+  --primary: #00ff41;
+  --primary-light: #4dff77;
+  --primary-dark: #00b82e;
+  --font: 'Fira Code', 'Cascadia Code', monospace;
+  --gradient-hero: linear-gradient(135deg, #000000 0%, #001a08 50%, #000000 100%);
+}
+html[data-theme="matrix"] body { font-family: var(--font); }
+
+/* ─── SEPIA (paper-like, easy on eyes) ─── */
+html[data-theme="sepia"] {
+  --bg: #f5ecd9;
+  --bg-card: #ffffff;
+  --bg-card-hover: #faf3e5;
+  --bg-surface: #ede2c8;
+  --text: #3a2a18;
+  --text-muted: #6b4f30;
+  --text-dim: #9c7a4a;
+  --border: #d6c4a4;
+  --border-light: #e0d2b6;
+  --primary: #8b4513;
+  --primary-light: #b35e1e;
+  --primary-dark: #6b3410;
+  --gradient-hero: linear-gradient(135deg, #f5ecd9 0%, #ebe0c8 50%, #f5ecd9 100%);
+}
+
+/* ─── FOREST (deep green) ─── */
+html[data-theme="forest"] {
+  --bg: #0d1f15;
+  --bg-card: #1a2e22;
+  --bg-card-hover: #244030;
+  --bg-surface: #142519;
+  --text: #d4e4d4;
+  --text-muted: #95b095;
+  --text-dim: #5a7a5a;
+  --border: #2a4a35;
+  --border-light: #3d6048;
+  --primary: #4ade80;
+  --primary-light: #6ee79f;
+  --primary-dark: #22c55e;
+  --gradient-hero: linear-gradient(135deg, #0d1f15 0%, #1a3024 50%, #0d1f15 100%);
+}
+
+/* ─── SUNSET (warm orange/pink) ─── */
+html[data-theme="sunset"] {
+  --bg: #1a0e1a;
+  --bg-card: #2a1a2e;
+  --bg-card-hover: #3a2540;
+  --bg-surface: #221422;
+  --text: #fde6d0;
+  --text-muted: #f0b890;
+  --text-dim: #b88060;
+  --border: #4a2a40;
+  --border-light: #5e3a52;
+  --primary: #ff6b35;
+  --primary-light: #ff8c5a;
+  --primary-dark: #d44a18;
+  --accent: #f7b801;
+  --gradient-hero: linear-gradient(135deg, #1a0e1a 0%, #4a1a2a 50%, #1a0e1a 100%);
+}
+
+/* ─── OCEAN DEEP (deep blue) ─── */
+html[data-theme="ocean-deep"] {
+  --bg: #001830;
+  --bg-card: #002844;
+  --bg-card-hover: #003860;
+  --bg-surface: #001020;
+  --text: #d4ecff;
+  --text-muted: #8ab8d8;
+  --text-dim: #5080a8;
+  --border: #003860;
+  --border-light: #004880;
+  --primary: #00b4d8;
+  --primary-light: #48cae4;
+  --primary-dark: #0096c7;
+  --gradient-hero: linear-gradient(135deg, #001830 0%, #003366 50%, #001830 100%);
+}
+
+/* ─── VAPORWAVE (pink/purple/cyan) ─── */
+html[data-theme="vaporwave"] {
+  --bg: #1a0033;
+  --bg-card: #2d0a4f;
+  --bg-card-hover: #3d1465;
+  --bg-surface: #220642;
+  --text: #ff71ce;
+  --text-muted: #b967ff;
+  --text-dim: #794998;
+  --border: #ff71ce;
+  --border-light: #01cdfe;
+  --primary: #ff71ce;
+  --primary-light: #ff9dde;
+  --primary-dark: #d04ea6;
+  --accent: #01cdfe;
+  --accent2: #05ffa1;
+  --font: 'Poppins', sans-serif;
+  --gradient-hero: linear-gradient(135deg, #1a0033 0%, #5e0a8a 50%, #1a0033 100%);
+}
+
+/* ─── HIGH CONTRAST DARK (a11y) ─── */
+html[data-theme="high-contrast-dark"] {
+  --bg: #000000;
+  --bg-card: #0a0a0a;
+  --bg-card-hover: #1a1a1a;
+  --bg-surface: #000000;
+  --text: #ffffff;
+  --text-muted: #f0f0f0;
+  --text-dim: #c0c0c0;
+  --border: #ffffff;
+  --border-light: #cccccc;
+  --primary: #ffff00;
+  --primary-light: #ffff66;
+  --primary-dark: #cccc00;
+  --gradient-hero: linear-gradient(135deg, #000 0%, #111 50%, #000 100%);
+}
+html[data-theme="high-contrast-dark"] .card,
+html[data-theme="high-contrast-dark"] .stat-card { border: 2px solid #fff !important; }
+
+/* ─── STRIPE (clean SaaS purple) ─── */
+html[data-theme="stripe"] {
+  --bg: #0a0e27;
+  --bg-card: #1a1f3a;
+  --bg-card-hover: #252a52;
+  --bg-surface: #131732;
+  --text: #ffffff;
+  --text-muted: #adbdcc;
+  --text-dim: #6a7790;
+  --border: #2a2f50;
+  --border-light: #3a3f60;
+  --primary: #635bff;
+  --primary-light: #8175ff;
+  --primary-dark: #4f48cc;
+  --accent: #00d4ff;
+  --gradient-hero: linear-gradient(135deg, #0a0e27 0%, #1f1a4a 50%, #0a0e27 100%);
+}
+
+/* ─── VERCEL LIGHT (minimal dark/light flat) ─── */
+html[data-theme="vercel-light"] {
+  --bg: #ffffff;
+  --bg-card: #fafafa;
+  --bg-card-hover: #f0f0f0;
+  --bg-surface: #f5f5f5;
+  --text: #000000;
+  --text-muted: #666666;
+  --text-dim: #999999;
+  --border: #eaeaea;
+  --border-light: #d4d4d4;
+  --primary: #000000;
+  --primary-light: #333333;
+  --primary-dark: #000000;
+  --gradient-hero: linear-gradient(135deg, #fff 0%, #f5f5f5 50%, #fff 100%);
+}
+
+/* ─── SUPABASE (green/black) ─── */
+html[data-theme="supabase"] {
+  --bg: #1c1c1c;
+  --bg-card: #232323;
+  --bg-card-hover: #2e2e2e;
+  --bg-surface: #181818;
+  --text: #ededed;
+  --text-muted: #a0a0a0;
+  --text-dim: #707070;
+  --border: #2e2e2e;
+  --border-light: #3e3e3e;
+  --primary: #3ecf8e;
+  --primary-light: #50e0a0;
+  --primary-dark: #2eb878;
+  --gradient-hero: linear-gradient(135deg, #1c1c1c 0%, #1a3024 50%, #1c1c1c 100%);
+}
+
+/* ─── ROSEPINE ─── */
+html[data-theme="rosepine"] {
+  --bg: #191724;
+  --bg-card: #26233a;
+  --bg-card-hover: #393552;
+  --bg-surface: #1f1d2e;
+  --text: #e0def4;
+  --text-muted: #908caa;
+  --text-dim: #6e6a86;
+  --border: #393552;
+  --border-light: #4a4561;
+  --primary: #eb6f92;
+  --primary-light: #f08fa9;
+  --primary-dark: #c75376;
+  --accent: #ebbcba;
+  --gradient-hero: linear-gradient(135deg, #191724 0%, #2a1f3d 50%, #191724 100%);
+}
+
+/* ─── SYNTHWAVE ─── */
+html[data-theme="synthwave"] {
+  --bg: #1a1033;
+  --bg-card: #2a1a55;
+  --bg-card-hover: #3a2570;
+  --bg-surface: #221545;
+  --text: #f5d3ff;
+  --text-muted: #c498ff;
+  --text-dim: #8a60c0;
+  --border: #4a2a80;
+  --border-light: #5e3aa0;
+  --primary: #ff2a6d;
+  --primary-light: #ff5588;
+  --primary-dark: #d01355;
+  --accent: #05d9e8;
+  --gradient-hero: linear-gradient(135deg, #1a1033 0%, #3d1a6e 50%, #1a1033 100%);
+}
+
+/* ─── DISCORD ─── */
+html[data-theme="discord"] {
+  --bg: #36393f;
+  --bg-card: #2f3136;
+  --bg-card-hover: #40444b;
+  --bg-surface: #202225;
+  --text: #dcddde;
+  --text-muted: #b9bbbe;
+  --text-dim: #72767d;
+  --border: #202225;
+  --border-light: #4f545c;
+  --primary: #5865f2;
+  --primary-light: #7983f5;
+  --primary-dark: #4752c4;
+  --gradient-hero: linear-gradient(135deg, #36393f 0%, #404a8a 50%, #36393f 100%);
+}
+
+/* ─── CURSOR (IDE dark slate) ─── */
+html[data-theme="cursor"] {
+  --bg: #0a0d12;
+  --bg-card: #161b24;
+  --bg-card-hover: #1f2632;
+  --bg-surface: #11151c;
+  --text: #e6edf3;
+  --text-muted: #9ba8b8;
+  --text-dim: #6b7785;
+  --border: #21262d;
+  --border-light: #30363d;
+  --primary: #58a6ff;
+  --primary-light: #79b8ff;
+  --primary-dark: #1f6feb;
+  --gradient-hero: linear-gradient(135deg, #0a0d12 0%, #142035 50%, #0a0d12 100%);
+}
+
+/* ─── PERPLEXITY ─── */
+html[data-theme="perplexity"] {
+  --bg: #191a1a;
+  --bg-card: #232425;
+  --bg-card-hover: #2c2d2e;
+  --bg-surface: #141515;
+  --text: #ebebeb;
+  --text-muted: #adb1b3;
+  --text-dim: #797d80;
+  --border: #2e2f30;
+  --border-light: #3e3f40;
+  --primary: #20b8cd;
+  --primary-light: #45cee0;
+  --primary-dark: #1899ad;
+  --gradient-hero: linear-gradient(135deg, #191a1a 0%, #14333b 50%, #191a1a 100%);
+}
+
+/* ============================================================
+   THEME-AWARE: navbar/sidebar/footer/cards inherit through vars.
+   No per-theme overrides needed — base style.css already binds
+   .nav, .footer, .card, .stat-card to var(--bg-card), var(--text), etc.
+   ============================================================ */
+
+/* =============================================================
+   THEME POLISH — make navbar / sidebar / footer / chrome follow
+   the active palette instead of hardcoded rgba(11,17,32,*).
+   color-mix gives a translucent tint of --bg without inventing
+   new variables per theme.
+   ============================================================= */
+html[data-theme] .navbar {
+  background: color-mix(in srgb, var(--bg) 88%, transparent) !important;
+  border-bottom: 1px solid var(--border) !important;
+}
+@supports not (background: color-mix(in srgb, red, blue)) {
+  html[data-theme] .navbar { background: var(--bg-card) !important; }
+}
+
+html[data-theme] .navbar-links a:hover,
+html[data-theme] .navbar-links a.active {
+  background: color-mix(in srgb, var(--text) 8%, transparent) !important;
+  color: var(--text) !important;
+}
+
+html[data-theme] .theme-toggle {
+  background: color-mix(in srgb, var(--text) 6%, transparent) !important;
+  color: var(--text) !important;
+  border: 1px solid var(--border) !important;
+}
+html[data-theme] .theme-toggle:hover {
+  background: color-mix(in srgb, var(--primary) 18%, transparent) !important;
+  color: var(--primary-light) !important;
+  border-color: var(--primary) !important;
+}
+
+html[data-theme] .footer,
+html[data-theme] .footer-bottom {
+  background: var(--bg-card);
+  border-color: var(--border);
+}
+
+html[data-theme] .doc-sidebar a:hover {
+  background: color-mix(in srgb, var(--text) 5%, transparent) !important;
+  color: var(--text) !important;
+}
+html[data-theme] .doc-sidebar a.active {
+  background: color-mix(in srgb, var(--primary) 14%, transparent) !important;
+  color: var(--primary-light) !important;
+  border-left-color: var(--primary) !important;
+}
+
+html[data-theme] tbody tr:hover {
+  background: color-mix(in srgb, var(--text) 4%, transparent) !important;
+}
+
+html[data-theme] pre,
+html[data-theme] code:not(pre code) {
+  background: color-mix(in srgb, var(--bg) 70%, var(--bg-card)) !important;
+  color: var(--text) !important;
+  border: 1px solid var(--border);
+}
+
+html[data-theme] .doc-toc {
+  background: color-mix(in srgb, var(--bg-card) 85%, transparent);
+  border-color: var(--border);
+}
+
+/* Inputs / selects on docs site */
+html[data-theme] input,
+html[data-theme] select,
+html[data-theme] textarea {
+  background: var(--bg-surface);
+  color: var(--text);
+  border: 1px solid var(--border);
+}
+html[data-theme] input:focus,
+html[data-theme] select:focus,
+html[data-theme] textarea:focus {
+  border-color: var(--primary);
+  outline: none;
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--primary) 20%, transparent);
+}
+
+/* Theme picker dropdown chrome */
+html[data-theme] #docs-theme-picker-menu {
+  background: var(--bg-card) !important;
+  color: var(--text) !important;
+  border: 1px solid var(--border) !important;
+  box-shadow: 0 12px 32px rgba(0,0,0,0.35);
+}
+html[data-theme] #docs-theme-picker-menu .tg-title {
+  color: var(--text-muted) !important;
+}
+html[data-theme] #docs-theme-picker-menu button:hover {
+  background: color-mix(in srgb, var(--primary) 12%, transparent) !important;
+}
