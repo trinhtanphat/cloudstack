@@ -1,0 +1,561 @@
+<!doctype html>
+<html lang="vi" data-theme="">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>VNSO CloudStack — Hướng dẫn triển khai chi tiết</title>
+<meta name="description" content="Hướng dẫn end-to-end: thiết kế hạ tầng, sizing, mạng, lưu trữ, cài đặt management cluster, host KVM, zone/pod/cluster, vận hành và báo cáo dung lượng." />
+<link rel="icon" type="image/png" sizes="32x32" href="assets/brand/favicon-32x32.png" />
+<link rel="apple-touch-icon" href="assets/brand/logo.png" />
+<meta property="og:image" content="assets/brand/logo-social-2024.png" />
+<link rel="stylesheet" href="assets/style.css" />
+<link rel="stylesheet" href="assets/themes.css" />
+<script src="assets/theme.js" defer></script>
+<script src="assets/theme-picker.js" defer></script>
+<style>
+  .ig-grid { display:grid; grid-template-columns: 240px 1fr; gap: 28px; align-items: start; }
+  @media (max-width: 960px) { .ig-grid { grid-template-columns: 1fr; } }
+  .ig-toc { position: sticky; top: 80px; background: var(--bg-elev); border:1px solid var(--border);
+    border-radius: var(--radius); padding: 14px 16px; max-height: calc(100vh - 110px); overflow:auto; }
+  .ig-toc h4 { margin: 8px 0 6px; font-size:.85rem; text-transform:uppercase; letter-spacing:.05em; color: var(--muted); }
+  .ig-toc a { display:block; padding: 4px 6px; border-radius: 6px; color: var(--text); text-decoration:none; font-size:.92rem; }
+  .ig-toc a:hover, .ig-toc a:focus { background: var(--bg-hover); }
+  .ig-content section { scroll-margin-top: 90px; padding-bottom: 28px; border-bottom: 1px dashed var(--border); margin-bottom: 28px; }
+  .ig-content section:last-of-type { border-bottom: none; }
+  .ig-content h2 { margin-top: 0; }
+  .ig-content h3 { margin-top: 1.6em; }
+  table.matrix { border-collapse: collapse; width: 100%; font-size:.93rem; }
+  table.matrix th, table.matrix td { border: 1px solid var(--border); padding: 8px 10px; text-align: left; vertical-align: top; }
+  table.matrix th { background: var(--bg-elev); position: sticky; top: 0; }
+  table.matrix tbody tr:nth-child(odd) { background: var(--bg-card); }
+  .pill { display:inline-block; padding: 2px 9px; border-radius: 999px; font-size: .76rem; font-weight: 600;
+    border: 1px solid var(--border); background: var(--bg-elev); color: var(--text); }
+  .pill.ok { background:#16a34a22; color:#16a34a; border-color:#16a34a55; }
+  .pill.warn { background:#f59e0b22; color:#b45309; border-color:#f59e0b55; }
+  .pill.crit { background:#dc262622; color:#dc2626; border-color:#dc262655; }
+  .ascii { font-family: ui-monospace, "JetBrains Mono", Menlo, Consolas, monospace;
+    background: var(--bg-elev); border:1px solid var(--border); border-radius: var(--radius);
+    padding: 14px 16px; white-space: pre; overflow-x: auto; font-size: .82rem; line-height: 1.4; }
+  .kpis { display:grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; margin: 14px 0; }
+  .kpi { background: var(--bg-card); border:1px solid var(--border); border-radius: var(--radius); padding: 12px 14px; }
+  .kpi .v { font-size: 1.6rem; font-weight: 700; }
+  .kpi .l { font-size: .82rem; color: var(--muted); text-transform: uppercase; letter-spacing: .04em; }
+  .checklist { list-style: none; padding-left: 0; }
+  .checklist li { padding: 4px 0 4px 26px; position: relative; }
+  .checklist li::before { content: "☐"; position: absolute; left: 0; color: var(--muted); }
+  .callout { border-left: 4px solid var(--accent, #2563eb); background: var(--bg-elev);
+    padding: 10px 14px; border-radius: 6px; margin: 14px 0; }
+  .callout.warn { border-left-color: #f59e0b; }
+  .callout.danger { border-left-color: #dc2626; }
+  pre { font-size: .85rem; }
+  .step { counter-reset: step; }
+  .step h4 { counter-increment: step; }
+  .step h4::before { content: "Bước " counter(step) " — "; color: var(--muted); font-weight: 600; }
+</style>
+</head>
+<body>
+<header class="site-header">
+  <div class="wrap">
+    <a class="brand" href="index.html"><span class="dot"></span> VNSO CloudStack</a>
+    <nav class="primary" aria-label="Primary">
+      <a href="index.html">Tổng quan</a>
+      <a href="features.html">Tính năng</a>
+      <a href="catalog.html">Catalog</a>
+      <a href="architecture.html">Kiến trúc</a>
+      <a href="clients.html">Clients</a>
+      <a href="gcp-integrations.html">GCP</a>
+      <a href="security.html">Bảo mật</a>
+      <a href="operations.html">Vận hành</a>
+      <a href="workflows.html">Workflows</a>
+      <a href="setup.html">Hướng dẫn</a>
+      <a href="install-guide.html" class="active">Triển khai</a>
+      <a href="roadmap.html">Roadmap</a>
+    </nav>
+    <span class="spacer"></span>
+    <button type="button" class="theme-toggle" aria-label="Toggle theme">☾ Dark</button>
+  </div>
+</header>
+
+<main class="wrap">
+  <h1>Hướng dẫn triển khai chi tiết</h1>
+  <p class="muted">Bộ tài liệu end-to-end để thiết kế, cài đặt và bàn giao một hạ tầng VNSO CloudStack production: từ chuẩn bị host vật lý → quản lý cluster → cấu hình mạng &amp; lưu trữ → bảo mật → báo cáo dung lượng.</p>
+
+  <div class="kpis">
+    <div class="kpi"><div class="v">~3 giờ</div><div class="l">Thời gian deploy 1 zone PoC</div></div>
+    <div class="kpi"><div class="v">~16 giờ</div><div class="l">Production HA (3 management + 4 KVM)</div></div>
+    <div class="kpi"><div class="v">≥ 99.95%</div><div class="l">SLA mục tiêu sau khi triển khai</div></div>
+    <div class="kpi"><div class="v">15 phần</div><div class="l">Phần trong tài liệu này</div></div>
+  </div>
+
+  <div class="ig-grid">
+    <aside class="ig-toc" aria-label="Mục lục">
+      <h4>Phần I — Thiết kế</h4>
+      <a href="#arch">1. Kiến trúc tham chiếu</a>
+      <a href="#sizing">2. Sizing &amp; capacity</a>
+      <a href="#network-plan">3. Sơ đồ mạng &amp; VLAN</a>
+      <a href="#storage-plan">4. Lưu trữ Primary/Secondary</a>
+      <a href="#bom">5. BoM &amp; chi phí mẫu</a>
+
+      <h4>Phần II — Cài đặt</h4>
+      <a href="#prep-host">6. Chuẩn bị host vật lý</a>
+      <a href="#mgmt-cluster">7. Management Server cluster</a>
+      <a href="#mysql-ha">8. MySQL InnoDB Cluster</a>
+      <a href="#kvm-host">9. Cài KVM host</a>
+      <a href="#zone-pod">10. Zone / Pod / Cluster</a>
+      <a href="#systemvm">11. SystemVM &amp; templates</a>
+
+      <h4>Phần III — Vận hành</h4>
+      <a href="#hardening">12. Hardening &amp; TLS</a>
+      <a href="#monitor">13. Monitoring &amp; alert</a>
+      <a href="#backup">14. Backup &amp; DR</a>
+      <a href="#report">15. Báo cáo dung lượng</a>
+    </aside>
+
+    <div class="ig-content">
+
+      <!-- ============================ PHẦN I ============================ -->
+      <section id="arch">
+        <h2>1. Kiến trúc tham chiếu</h2>
+        <p>VNSO CloudStack chia làm 4 lớp logic: <em>access</em>, <em>management</em>, <em>compute</em>, <em>storage</em>. Mỗi lớp tách VLAN riêng và có ít nhất 2 path redundancy.</p>
+        <pre class="ascii">          ┌────────────────────────────────────────────────────────────┐
+          │                       INTERNET / WAN                       │
+          └────────────┬──────────────────────────────────┬────────────┘
+                       │                                  │
+                  ┌────▼───┐                          ┌───▼─────┐
+                  │  WAF   │  (Cloudflare / F5)       │ DDoS    │
+                  └────┬───┘                          └───┬─────┘
+                       │                                  │
+                ┌──────▼──────────────────────────────────▼──────┐
+                │   nginx LB (active-active, keepalived VIP)    │  ── access tier (VLAN 10)
+                │   TLS 1.3, HSTS, CSP, rate-limit              │
+                └─────────┬─────────────────┬────────────────────┘
+                          │                 │
+              ┌───────────▼─┐   ┌───────────▼─┐
+              │ mgmt-1      │   │ mgmt-2      │   ── management tier (VLAN 20)
+              │ (Jetty:8080)│   │ (Jetty:8080)│      Java 17 + ServerDaemon
+              │ usage,api   │   │ usage,api   │      shared MySQL
+              └─────────┬───┘   └───┬─────────┘
+                        │           │
+                ┌───────▼───────────▼───────┐
+                │  MySQL InnoDB Cluster x3  │  ── data tier (VLAN 21)
+                │  + MySQL Router 8.x       │
+                └─────────────┬─────────────┘
+                              │
+       ┌──────────────────────┼──────────────────────┐
+       │                      │                      │
+   ┌───▼────┐            ┌────▼────┐            ┌────▼────┐
+   │ KVM-1  │   ...      │ KVM-N   │            │ SSVM/CPVM│  ── compute (VLAN 30, guest 31)
+   │ qemu   │            │ qemu    │            │ on KVM-1 │
+   └───┬────┘            └────┬────┘            └─────────┘
+       │  storage NICs (LACP, VLAN 40)
+       │
+   ┌───▼─────────────────────────────────────┐
+   │ Primary: NFS / Ceph RBD                 │
+   │ Secondary: NFS / S3 (Cloudian)          │  ── storage tier
+   └─────────────────────────────────────────┘</pre>
+        <p>Xem thêm sơ đồ tương tác chi tiết tại <a href="architecture.html">Kiến trúc</a> và sequence flow tại <a href="workflows.html">Workflows</a>.</p>
+      </section>
+
+      <section id="sizing">
+        <h2>2. Sizing &amp; capacity matrix</h2>
+        <p>Bảng dưới được rút từ Apache CloudStack capacity guide kết hợp benchmark VNSO trên Intel Sapphire Rapids + NVMe Gen4.</p>
+        <table class="matrix">
+          <thead>
+            <tr>
+              <th>Thành phần</th><th>PoC (≤ 50 VM)</th><th>SMB (≤ 500 VM)</th><th>Enterprise (≤ 5 000 VM)</th><th>Carrier (≥ 10 000 VM)</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td>Management nodes</td><td>1× 4 vCPU/8 GB</td><td>2× 8 vCPU/16 GB</td><td>3× 16 vCPU/32 GB</td><td>5× 16 vCPU/64 GB</td></tr>
+            <tr><td>MySQL</td><td>1× 4 vCPU/8 GB SSD 200 GB</td><td>1× 8 vCPU/32 GB NVMe 500 GB</td><td>InnoDB Cluster 3× 16 vCPU/64 GB NVMe 1 TB</td><td>InnoDB Cluster 5× 32 vCPU/128 GB NVMe 2 TB + ProxySQL</td></tr>
+            <tr><td>KVM host</td><td>2× 16c/64 GB</td><td>4× 32c/128 GB</td><td>10× 64c/512 GB</td><td>30+× 96c/1 TB</td></tr>
+            <tr><td>Primary storage</td><td>NFS 4 TB</td><td>NFS 20 TB</td><td>Ceph RBD 200 TB (replica 3)</td><td>Ceph RBD 1 PB + EC 4+2</td></tr>
+            <tr><td>Secondary</td><td>NFS 8 TB</td><td>NFS 40 TB</td><td>S3 Cloudian 500 TB</td><td>S3 Cloudian 2 PB + cross-region</td></tr>
+            <tr><td>Network</td><td>1 Gbps × 2</td><td>10 Gbps × 2 (LACP)</td><td>25 Gbps × 4</td><td>100 Gbps spine-leaf</td></tr>
+            <tr><td>Concurrent API</td><td>50 req/s</td><td>200 req/s</td><td>1 000 req/s</td><td>5 000 req/s</td></tr>
+            <tr><td>Async-job throughput</td><td>30 jobs/min</td><td>200 jobs/min</td><td>1 500 jobs/min</td><td>10 000 jobs/min</td></tr>
+          </tbody>
+        </table>
+        <h3>Công thức nhanh</h3>
+        <ul>
+          <li><strong>vCPU host</strong> = <code>(VM_count × avg_vCPU) / overcommit_ratio</code> với overcommit thường 4:1.</li>
+          <li><strong>RAM host</strong> = <code>(VM_count × avg_RAM) / 0.85</code> (giữ 15 % cho hypervisor + balloon).</li>
+          <li><strong>IOPS Primary</strong> = <code>VM_count × avg_iops_per_vm × 1.3</code> (peak factor).</li>
+          <li><strong>Bandwidth guest</strong> = <code>VM_count × avg_mbps × 0.6</code> (giả định non-coincidence 60 %).</li>
+        </ul>
+      </section>
+
+      <section id="network-plan">
+        <h2>3. Sơ đồ mạng &amp; VLAN</h2>
+        <table class="matrix">
+          <thead><tr><th>Tier</th><th>VLAN</th><th>Subnet ví dụ</th><th>Mục đích</th><th>Bảo mật</th></tr></thead>
+          <tbody>
+            <tr><td>Public</td><td>10</td><td>203.0.113.0/24</td><td>Source NAT, public IP của VR</td><td>Cloud-edge ACL, DDoS scrubbing</td></tr>
+            <tr><td>Management</td><td>20</td><td>10.20.0.0/22</td><td>Mgmt server ↔ DB ↔ host agent</td><td>RBAC, mTLS giữa mgmt-host</td></tr>
+            <tr><td>Storage</td><td>40</td><td>10.40.0.0/22</td><td>NFS/Ceph public network</td><td>Jumbo MTU 9000, ACL whitelist</td></tr>
+            <tr><td>Storage cluster</td><td>41</td><td>10.41.0.0/22</td><td>Ceph cluster heartbeat / replication</td><td>Riêng, không route ra ngoài</td></tr>
+            <tr><td>Guest</td><td>100-3999</td><td>VPC tier subnet</td><td>VM workload</td><td>SG/ACL theo project</td></tr>
+            <tr><td>System</td><td>30</td><td>169.254.0.0/16</td><td>Link-local SystemVM</td><td>Internal, không expose</td></tr>
+          </tbody>
+        </table>
+        <h3>Cấu hình switch tham chiếu (Cisco/Arista)</h3>
+<pre><code>! Trunk port tới hypervisor (LACP bond0)
+interface Port-Channel10
+  switchport mode trunk
+  switchport trunk allowed vlan 10,20,30,31,40,41,100-200
+  mtu 9216
+!
+! ARP/ND security
+ip dhcp snooping vlan 10,30
+ip arp inspection vlan 30
+spanning-tree portfast trunk</code></pre>
+      </section>
+
+      <section id="storage-plan">
+        <h2>4. Lưu trữ Primary &amp; Secondary</h2>
+        <h3>Primary storage option</h3>
+        <table class="matrix">
+          <thead><tr><th>Backend</th><th>Latency</th><th>Use case</th><th>HA</th><th>Snapshot</th></tr></thead>
+          <tbody>
+            <tr><td>NFS (Linux/Synology)</td><td>1-3 ms</td><td>SMB, dev/test</td><td>Pacemaker active-passive</td><td>ZFS snapshot</td></tr>
+            <tr><td>Ceph RBD</td><td>0.5-2 ms</td><td>Production, scale-out</td><td>Replica 3 hoặc EC 4+2</td><td>RBD snapshot + clone</td></tr>
+            <tr><td>iSCSI / FC SAN</td><td>0.3-1 ms</td><td>Workload IOPS cao</td><td>Multipath ALUA</td><td>SAN-side snapshot</td></tr>
+            <tr><td>SolidFire</td><td>0.5 ms</td><td>QoS guaranteed</td><td>RF=2/3</td><td>Native snapshot</td></tr>
+          </tbody>
+        </table>
+        <h3>Secondary storage</h3>
+        <ul>
+          <li><strong>NFS</strong>: đơn giản, mount thẳng vào SSVM. Phù hợp ≤ 50 TB.</li>
+          <li><strong>S3 (Cloudian / MinIO)</strong>: scale &gt; 100 TB, lifecycle &amp; cross-region.</li>
+          <li><strong>Hybrid</strong>: NFS cache + S3 long-term (CloudStack hỗ trợ object_store).</li>
+        </ul>
+        <h3>Khuyến nghị I/O</h3>
+        <pre><code>NFS export options:
+  rw,sync,no_subtree_check,no_root_squash,fsid=1
+
+XFS mount cho hypervisor:
+  noatime,nodiratime,inode64,allocsize=1m,logbufs=8,logbsize=256k
+
+Ceph pool:
+  osd pool create primary 256 256 replicated
+  ceph osd pool application enable primary rbd
+  ceph osd pool set primary size 3 min_size 2</code></pre>
+      </section>
+
+      <section id="bom">
+        <h2>5. Bill of Materials &amp; chi phí tham khảo</h2>
+        <p>Cấu hình SMB-tier (≤ 500 VM, 99.95 % SLA), giá tham khảo Việt Nam Q1/2026.</p>
+        <table class="matrix">
+          <thead><tr><th>Hạng mục</th><th>Số lượng</th><th>Spec</th><th>Đơn giá (VNĐ)</th><th>Thành tiền</th></tr></thead>
+          <tbody>
+            <tr><td>Server quản lý</td><td>2</td><td>Dell R660, 2× Xeon Gold 6448Y, 128 GB, 2× 960 GB NVMe</td><td>180.000.000</td><td>360.000.000</td></tr>
+            <tr><td>Server DB</td><td>3</td><td>R660, 2× Gold 6444Y, 256 GB, 4× 1.92 TB NVMe RAID10</td><td>240.000.000</td><td>720.000.000</td></tr>
+            <tr><td>Server KVM</td><td>4</td><td>R760, 2× Gold 6448Y, 512 GB, 2× 480 GB SATA</td><td>250.000.000</td><td>1.000.000.000</td></tr>
+            <tr><td>Switch ToR</td><td>2</td><td>Arista 7050X3-32S, 32× 25G + 4× 100G</td><td>320.000.000</td><td>640.000.000</td></tr>
+            <tr><td>Storage NAS</td><td>2</td><td>TrueNAS M40-HA 200 TB usable</td><td>1.500.000.000</td><td>3.000.000.000</td></tr>
+            <tr><td>UPS + tủ rack</td><td>1 lot</td><td>APC SRT 10 kVA + tủ 42U</td><td>—</td><td>180.000.000</td></tr>
+            <tr><td>Bản quyền hỗ trợ năm 1</td><td>1</td><td>VNSO Premium 8×5</td><td>—</td><td>200.000.000</td></tr>
+            <tr><th colspan="4">Tổng (chưa thuế)</th><th>≈ 6,1 tỷ</th></tr>
+          </tbody>
+        </table>
+      </section>
+
+      <!-- ============================ PHẦN II ============================ -->
+      <section id="prep-host">
+        <h2>6. Chuẩn bị host vật lý</h2>
+        <div class="step">
+          <h4>BIOS &amp; firmware</h4>
+          <ul>
+            <li>Bật Intel VT-x / AMD-V, IOMMU, SR-IOV (nếu cần).</li>
+            <li>Vô hiệu hóa C-states sâu hơn C1 cho workload latency-critical.</li>
+            <li>Cập nhật firmware NIC, RAID, BMC theo bản LTS.</li>
+          </ul>
+          <h4>OS baseline</h4>
+          <pre><code># Rocky 9 / Ubuntu 22.04 minimal
+sudo dnf groupinstall -y "Development Tools" || sudo apt -y install build-essential
+sudo systemctl disable --now firewalld; sudo systemctl enable --now nftables
+sudo timedatectl set-timezone Asia/Ho_Chi_Minh
+sudo systemctl enable --now chronyd
+sudo sed -i 's/SELINUX=enforcing/SELINUX=permissive/' /etc/selinux/config  # KVM host
+sudo sysctl -w vm.swappiness=10 fs.file-max=2097152 net.core.somaxconn=65535</code></pre>
+          <h4>Mạng (LACP bond + VLAN)</h4>
+          <pre><code># /etc/systemd/network/10-bond0.netdev
+[NetDev]
+Name=bond0
+Kind=bond
+[Bond]
+Mode=802.3ad
+LACPTransmitRate=fast
+TransmitHashPolicy=layer3+4
+
+# /etc/systemd/network/20-bond0.network
+[Match]
+Name=bond0
+[Network]
+VLAN=mgmt
+VLAN=storage
+VLAN=guest</code></pre>
+          <h4>Kernel tuning cho KVM</h4>
+          <pre><code>cat &lt;&lt;EOF | sudo tee /etc/sysctl.d/90-cloudstack.conf
+net.bridge.bridge-nf-call-iptables = 0
+net.ipv4.ip_forward = 1
+vm.dirty_ratio = 20
+vm.dirty_background_ratio = 5
+EOF
+sudo sysctl --system</code></pre>
+        </div>
+      </section>
+
+      <section id="mgmt-cluster">
+        <h2>7. Management Server cluster</h2>
+        <p>Dùng Docker compose (image VNSO build) hoặc package Debian/RPM. Khuyến nghị 2-3 node sau LB.</p>
+        <h3>7.1. Triển khai bằng compose (PoC)</h3>
+        <pre><code>git clone https://github.com/trinhtanphat/cloudstack.git
+cd cloudstack
+git checkout vnso
+docker compose -f docker-compose.prod.yml up -d
+# Theo dõi
+docker compose logs -f cloudstack-mgmt | grep -E 'ERROR|Started|listening'</code></pre>
+        <p>File <code>docker-compose.prod.yml</code> đã có:</p>
+        <ul>
+          <li><span class="pill ok">wait-for-DB</span> entrypoint chờ MySQL TCP + handshake trước khi khởi Java.</li>
+          <li><span class="pill ok">healthcheck</span> probe <code>/client/</code> (200/302/401), start_period 180 s, retries 6.</li>
+          <li><span class="pill ok">restart: unless-stopped</span> + <code>stop_grace_period: 60s</code>.</li>
+        </ul>
+        <h3>7.2. Triển khai 2-3 node (HA)</h3>
+        <pre><code># Trên cả 3 node
+cp docker-compose.prod.yml docker-compose.yml
+docker compose up -d
+
+# nginx LB (host kế bên)
+upstream cloudstack_mgmt {
+    least_conn;
+    server mgmt-1.vnso.local:28080 max_fails=2 fail_timeout=15s;
+    server mgmt-2.vnso.local:28080 max_fails=2 fail_timeout=15s;
+    server mgmt-3.vnso.local:28080 max_fails=2 fail_timeout=15s;
+    keepalive 64;
+}
+server {
+    listen 443 ssl http2;
+    server_name manage.example.vn;
+    ssl_certificate     /etc/letsencrypt/live/manage.example.vn/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/manage.example.vn/privkey.pem;
+    include /etc/nginx/conf.d/vnso-cloudstack-headers.inc;
+    location /client/ { proxy_pass http://cloudstack_mgmt/client/; }
+}</code></pre>
+      </section>
+
+      <section id="mysql-ha">
+        <h2>8. MySQL InnoDB Cluster</h2>
+        <pre><code># Trên tất cả 3 node DB
+sudo dnf -y install mysql-shell mysql-router mysql-server
+sudo systemctl enable --now mysqld
+mysqlsh --uri root@localhost --sql -e "SET GLOBAL super_read_only=OFF;"
+
+# Trên node-1 (primary bootstrap)
+mysqlsh --uri clusteradm@db-1 -- dba configure-instance --interactive=false
+mysqlsh --uri clusteradm@db-1 -- dba create-cluster vnso
+mysqlsh --uri clusteradm@db-1 -- cluster add-instance db-2 --recovery-method=clone
+mysqlsh --uri clusteradm@db-1 -- cluster add-instance db-3 --recovery-method=clone
+
+# MySQL Router (chạy trên mỗi management node)
+mysqlrouter --bootstrap clusteradm@db-1:3306 \
+  --conf-base-port 6446 --user mysqlrouter
+sudo systemctl enable --now mysqlrouter
+
+# Trỏ CloudStack tới router
+sed -i 's|db.cloud.host=.*|db.cloud.host=127.0.0.1|; s|db.cloud.port=.*|db.cloud.port=6446|' \
+    /etc/cloudstack/management/db.properties</code></pre>
+        <div class="callout warn">Quan trọng: <strong>không</strong> để DB trên cùng compose project khác mà không có healthcheck — nếu MySQL phải chạy InnoDB recovery, mgmt sẽ chết Hikari pool và trả 503 ở <code>/client/</code>. File compose VNSO đã thêm <code>wait-for-DB</code> entrypoint để xử lý trường hợp này.</div>
+      </section>
+
+      <section id="kvm-host">
+        <h2>9. Cài KVM host</h2>
+        <pre><code>sudo dnf -y install qemu-kvm libvirt cloudstack-agent
+sudo systemctl enable --now libvirtd
+sudo systemctl enable --now cloudstack-agent
+
+# /etc/cloudstack/agent/agent.properties
+host=mgmt.vnso.local
+guid=$(uuidgen)
+public.network.device=cloudbr0
+private.network.device=cloudbr1
+storage.network.device=cloudbr2
+hypervisor.type=kvm
+
+# bridge cloudbr0/1/2 dùng NetworkManager hoặc systemd-networkd</code></pre>
+        <p>Sau đó vào UI → <em>Infrastructure → Hosts → Add Host</em>, nhập IP + root credentials. Agent sẽ tự đăng ký, chuyển trạng thái <em>Up</em> trong 1-2 phút.</p>
+      </section>
+
+      <section id="zone-pod">
+        <h2>10. Zone / Pod / Cluster</h2>
+        <table class="matrix">
+          <thead><tr><th>Khái niệm</th><th>Vai trò</th><th>Ghi chú</th></tr></thead>
+          <tbody>
+            <tr><td>Zone</td><td>Datacenter logic, có Public + Guest network riêng</td><td>1 zone = 1 site Active-Active</td></tr>
+            <tr><td>Pod</td><td>Subnet management, gateway riêng</td><td>1-2 pod / zone là đủ với SMB</td></tr>
+            <tr><td>Cluster</td><td>Nhóm host cùng hypervisor + primary storage</td><td>≤ 16 host / cluster (best practice KVM)</td></tr>
+            <tr><td>Host</td><td>1 hypervisor</td><td>Đã đăng ký agent</td></tr>
+          </tbody>
+        </table>
+        <p>Wizard Add Zone:</p>
+        <ol>
+          <li><strong>Network type</strong>: Advanced (chọn Security Groups nếu KVM flat).</li>
+          <li><strong>DNS</strong>: 1.1.1.1, 8.8.8.8 (hoặc DNS nội bộ).</li>
+          <li><strong>Domain</strong>: vnso.local.</li>
+          <li><strong>Physical network</strong>: kéo các traffic Management/Public/Guest/Storage vào NIC tương ứng.</li>
+          <li><strong>VLAN range</strong>: 100-3999 cho guest.</li>
+          <li><strong>Public IP range</strong>: 203.0.113.10 - 203.0.113.250.</li>
+          <li><strong>Pod</strong>: gateway 10.20.0.1, range 10.20.0.10-10.20.0.250.</li>
+          <li><strong>Cluster + Host</strong>: thêm host KVM với credentials.</li>
+          <li><strong>Primary storage</strong>: <code>nfs://10.40.0.10/export/primary</code>.</li>
+          <li><strong>Secondary</strong>: <code>nfs://10.40.0.10/export/secondary</code>.</li>
+          <li><strong>Launch zone</strong>: chờ SSVM/CPVM chuyển Running (5-10 phút).</li>
+        </ol>
+      </section>
+
+      <section id="systemvm">
+        <h2>11. SystemVM &amp; templates</h2>
+        <pre><code># Đăng ký template SystemVM (KVM)
+/usr/share/cloudstack-common/scripts/storage/secondary/cloud-install-sys-tmplt \
+  -m /mnt/secondary -u https://download.cloudstack.org/systemvm/4.20/systemvmtemplate-4.20.0-x86_64-kvm.qcow2.bz2 \
+  -h kvm -F
+
+# Đăng ký template Ubuntu 22.04 cho user
+ui → Templates → Register Template
+  Name: Ubuntu 22.04 LTS
+  URL : https://cloud-images.ubuntu.com/releases/22.04/release/ubuntu-22.04-server-cloudimg-amd64.img
+  Format: QCOW2
+  Hypervisor: KVM</code></pre>
+      </section>
+
+      <!-- ============================ PHẦN III =========================== -->
+      <section id="hardening">
+        <h2>12. Hardening &amp; TLS</h2>
+        <p>Sao chép snippets nginx VNSO đã chuẩn bị:</p>
+        <pre><code>sudo cp scripts/vnso/nginx/hardening.conf /etc/nginx/conf.d/
+sudo cp scripts/vnso/nginx/headers.inc    /etc/nginx/conf.d/
+sudo cp scripts/vnso/nginx/locations.example.conf /etc/nginx/conf.d/vnso-cloudstack.conf
+sudo certbot --nginx -d manage.example.vn
+sudo nginx -t &amp;&amp; sudo systemctl reload nginx</code></pre>
+        <ul class="checklist">
+          <li>TLS 1.2/1.3, HSTS 2 năm, OCSP stapling.</li>
+          <li>CSP, COOP, CORP, X-Content-Type-Options, Referrer-Policy.</li>
+          <li>Rate-limit zone <code>vnso_login</code> (5 r/s) + <code>vnso_api</code> (30 r/s).</li>
+          <li>Bật 2FA cho admin (TOTP), enforce password complexity (xem <a href="security.html">Security</a>).</li>
+          <li>Rotate API key 90 ngày: <code>scripts/vnso/rotate-admin-api-key.sh</code>.</li>
+          <li>Audit log forward sang ELK / Loki.</li>
+        </ul>
+      </section>
+
+      <section id="monitor">
+        <h2>13. Monitoring &amp; alert</h2>
+        <h3>Stack đề xuất</h3>
+        <ul>
+          <li>Prometheus + node_exporter + libvirt_exporter + mysqld_exporter + cloudstack_exporter.</li>
+          <li>Grafana dashboards: <code>scripts/vnso/grafana/*.json</code>.</li>
+          <li>Alertmanager → Slack / email / SMS Stringee.</li>
+        </ul>
+        <h3>Alert rule mẫu</h3>
+        <pre><code>groups:
+- name: vnso-cloudstack
+  rules:
+  - alert: MgmtHTTP503
+    expr: probe_http_status_code{instance=~"https://manage.+/client/"} == 503
+    for: 2m
+    labels: { severity: critical }
+    annotations:
+      summary: "CloudStack mgmt 503 over 2 minutes"
+      runbook: "https://docs-cloudstack.vnso.vn/operations.html#mgmt-503"
+  - alert: PrimaryStorageFull
+    expr: cloudstack_storage_pool_used_pct &gt; 0.85
+    for: 5m
+    labels: { severity: warning }
+  - alert: KVMHostDown
+    expr: up{job="libvirt"} == 0
+    for: 1m
+    labels: { severity: critical }</code></pre>
+      </section>
+
+      <section id="backup">
+        <h2>14. Backup &amp; DR</h2>
+        <table class="matrix">
+          <thead><tr><th>Đối tượng</th><th>Tần suất</th><th>Đích</th><th>RPO/RTO</th></tr></thead>
+          <tbody>
+            <tr><td>MySQL cloud DB</td><td>15 phút WAL + nightly full</td><td>S3 cross-region</td><td>RPO 15 ph / RTO 30 ph</td></tr>
+            <tr><td>Secondary store templates</td><td>nightly rsync</td><td>S3 Cloudian</td><td>RPO 24 h / RTO 4 h</td></tr>
+            <tr><td>VM root volume</td><td>nightly snapshot RBD</td><td>Same cluster + offsite hàng tuần</td><td>RPO 24 h / RTO 1 h</td></tr>
+            <tr><td>VM data volume</td><td>tùy theo policy SLA</td><td>Veeam Cloud Connect</td><td>RPO ≤ 1 h / RTO ≤ 30 ph</td></tr>
+            <tr><td>Mgmt config</td><td>Mỗi commit (GitOps)</td><td>GitHub vnso branch</td><td>RPO 0 / RTO 5 ph</td></tr>
+          </tbody>
+        </table>
+        <p>Script tham khảo: <code>scripts/vnso/backup-mysql.sh</code>, <code>scripts/vnso/backup-secondary.sh</code>.</p>
+      </section>
+
+      <section id="report">
+        <h2>15. Báo cáo dung lượng &amp; thống kê</h2>
+        <p>Sau khi cluster ổn định, vận hành nên xuất báo cáo định kỳ. Mẫu hằng tháng:</p>
+        <h3>15.1. KPI tổng quan</h3>
+        <div class="kpis">
+          <div class="kpi"><div class="v">98.7 %</div><div class="l">Uptime mgmt</div></div>
+          <div class="kpi"><div class="v">82 %</div><div class="l">CPU overcommit avg</div></div>
+          <div class="kpi"><div class="v">61 %</div><div class="l">RAM utilization</div></div>
+          <div class="kpi"><div class="v">47 %</div><div class="l">Primary storage used</div></div>
+          <div class="kpi"><div class="v">312 ms</div><div class="l">API p95 latency</div></div>
+          <div class="kpi"><div class="v">0</div><div class="l">SEV-1 incident</div></div>
+        </div>
+        <h3>15.2. Mẫu bảng dung lượng</h3>
+        <table class="matrix">
+          <thead><tr><th>Tài nguyên</th><th>Tổng</th><th>Đã dùng</th><th>Còn lại</th><th>Trạng thái</th></tr></thead>
+          <tbody>
+            <tr><td>vCPU</td><td>2 048</td><td>1 678</td><td>370</td><td><span class="pill warn">82 %</span></td></tr>
+            <tr><td>RAM (GB)</td><td>16 384</td><td>9 998</td><td>6 386</td><td><span class="pill ok">61 %</span></td></tr>
+            <tr><td>Primary (TB)</td><td>200</td><td>94</td><td>106</td><td><span class="pill ok">47 %</span></td></tr>
+            <tr><td>Secondary (TB)</td><td>500</td><td>312</td><td>188</td><td><span class="pill warn">62 %</span></td></tr>
+            <tr><td>Public IP</td><td>240</td><td>189</td><td>51</td><td><span class="pill warn">79 %</span></td></tr>
+          </tbody>
+        </table>
+        <h3>15.3. Lệnh xuất báo cáo từ DB</h3>
+        <pre><code>-- Tổng VM theo zone
+SELECT z.name AS zone, COUNT(*) AS vm_count
+  FROM vm_instance v JOIN data_center z ON v.data_center_id = z.id
+  WHERE v.removed IS NULL
+  GROUP BY z.name;
+
+-- Capacity overview
+SELECT capacity_type, SUM(used_capacity)/1e9 AS used_gb,
+       SUM(total_capacity)/1e9 AS total_gb,
+       ROUND(SUM(used_capacity)/SUM(total_capacity)*100,2) AS pct
+  FROM op_host_capacity
+  GROUP BY capacity_type;
+
+-- Top 10 VM theo CPU usage
+SELECT vm.instance_name, vm.service_offering_id, st.cpu_used
+  FROM vm_instance vm JOIN op_vm_stats st ON st.vm_id = vm.id
+  ORDER BY st.cpu_used DESC LIMIT 10;</code></pre>
+        <h3>15.4. Tự động hóa xuất PDF</h3>
+        <pre><code># Cron mỗi đầu tháng
+0 6 1 * * /opt/cloudstack/scripts/vnso/monthly-report.sh \
+  --zone all --format pdf --out /var/reports/$(date +\%Y-\%m).pdf \
+  --email cio@example.vn,ops@example.vn</code></pre>
+        <p>Script <code>monthly-report.sh</code> sẽ render template HTML này thành PDF (wkhtmltopdf), kèm biểu đồ Grafana snapshot và bảng SLA tháng.</p>
+      </section>
+
+      <section>
+        <h2>Tham chiếu nhanh</h2>
+        <ul>
+          <li><a href="architecture.html">Sơ đồ kiến trúc tương tác</a></li>
+          <li><a href="workflows.html">Workflow &amp; sequence diagrams</a></li>
+          <li><a href="security.html">Security checklist</a></li>
+          <li><a href="operations.html">Vận hành &amp; runbook</a></li>
+          <li><a href="setup.html">Quick-reference setup (15 bước)</a></li>
+        </ul>
+      </section>
+
+    </div>
+  </div>
+</main>
+
+<footer class="footer">© VNSO CloudStack — Apache License 2.0.</footer>
+</body>
+</html>
