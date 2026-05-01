@@ -49,6 +49,50 @@ import Cookies from 'js-cookie'
 import { getAPI } from '@/api'
 import { applyCustomGuiTheme } from './utils/guiTheme'
 
+const mountSharedThemePicker = () => {
+  if (document.getElementById('vnso-theme-picker')) return
+
+  const host = document.createElement('div')
+  host.id = 'vnso-theme-picker'
+  host.style.cssText =
+    'position:fixed;right:16px;bottom:16px;z-index:9999;display:flex;gap:8px;align-items:center;padding:8px 10px;border:1px solid var(--border,rgba(148,163,184,.25));border-radius:10px;background:var(--bg-secondary,rgba(15,23,42,.85));backdrop-filter:blur(8px);box-shadow:0 10px 24px rgba(2,6,23,.28);'
+
+  const mode = document.createElement('select')
+  mode.setAttribute('aria-label', 'Color mode')
+  mode.innerHTML =
+    '<option value="system">Auto</option><option value="dark">Dark</option><option value="light">Light</option>'
+
+  const theme = document.createElement('select')
+  theme.setAttribute('aria-label', 'Theme family')
+  theme.innerHTML =
+    '<option value="anthropic">anthropic</option><option value="v0">v0</option><option value="github-dim">github</option><option value="midnight">midnight</option><option value="linear">linear</option><option value="stripe">stripe</option><option value="notion">notion</option><option value="figma">figma</option><option value="raycast">raycast</option><option value="supabase">supabase</option><option value="railway">railway</option><option value="light">light</option><option value="system">system</option>'
+
+  const controlStyle =
+    'height:32px;padding:0 10px;border-radius:8px;border:1px solid var(--border,rgba(148,163,184,.3));background:var(--card-bg,#0f172a);color:var(--text,#e2e8f0);font:600 12px/1.2 ui-sans-serif,system-ui,sans-serif;'
+  mode.style.cssText = controlStyle
+  theme.style.cssText = controlStyle
+
+  const prefs = typeof window.__getPrefs === 'function' ? window.__getPrefs() : {}
+  mode.value = (prefs && prefs.color_scheme) || 'system'
+  theme.value = (prefs && prefs.theme) || 'midnight'
+
+  mode.addEventListener('change', () => {
+    if (typeof window.__setColorScheme === 'function') window.__setColorScheme(mode.value)
+  })
+  theme.addEventListener('change', () => {
+    if (typeof window.__setTheme === 'function') window.__setTheme(theme.value)
+  })
+
+  host.append(mode, theme)
+  document.body.appendChild(host)
+}
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', mountSharedThemePicker, { once: true })
+} else {
+  mountSharedThemePicker()
+}
+
 vueApp.use(VueAxios, router)
 vueApp.use(pollJobPlugin)
 vueApp.use(notifierPlugin)
