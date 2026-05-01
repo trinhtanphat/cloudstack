@@ -49,49 +49,65 @@ import Cookies from 'js-cookie'
 import { getAPI } from '@/api'
 import { applyCustomGuiTheme } from './utils/guiTheme'
 
-const mountSharedThemePicker = () => {
-  if (document.getElementById('vnso-theme-picker')) return
+// VNSO floating theme picker — full swatch picker (served via public/theme-kit/theme.js)
+;(function mountVNSOThemePicker () {
+  const PREFS_KEY = 'proxmoxai_prefs'
+  const LIGHT_VARIANTS = { anthropic: 'anthropic-light', v0: 'vercel-light', 'github-dim': 'github-light' }
+  const GROUPS = [
+    { label: 'AI Themes',    themes: ['midnight','cursor','anthropic','v0','perplexity','synthwave','aurora'] },
+    { label: 'Dark',         themes: ['nebula','nord','dracula','tokyo-night','github-dim','monokai','catppuccin','rosepine'] },
+    { label: 'Light',        themes: ['light','solarized','sakura','sepia','paper'] },
+    { label: 'SaaS Premium', themes: ['linear','stripe','notion','figma','raycast','supabase','railway'] },
+  ]
+  const LABELS = { midnight:'Midnight',cursor:'Cursor IDE',anthropic:'Anthropic',v0:'Vercel v0',perplexity:'Perplexity',synthwave:'Synthwave',aurora:'Aurora',nebula:'Nebula',nord:'Nord',dracula:'Dracula','tokyo-night':'Tokyo Night','github-dim':'GitHub Dim',monokai:'Monokai',catppuccin:'Catppuccin',rosepine:'Rosé Pine',light:'Light',solarized:'Solarized',sakura:'Sakura',sepia:'Sepia',paper:'Paper',linear:'Linear',stripe:'Stripe',notion:'Notion',figma:'Figma',raycast:'Raycast',supabase:'Supabase',railway:'Railway' }
 
-  const host = document.createElement('div')
-  host.id = 'vnso-theme-picker'
-  host.style.cssText =
-    'position:fixed;right:16px;bottom:16px;z-index:9999;display:flex;gap:8px;align-items:center;padding:8px 10px;border:1px solid var(--border,rgba(148,163,184,.25));border-radius:10px;background:var(--bg-secondary,rgba(15,23,42,.85));backdrop-filter:blur(8px);box-shadow:0 10px 24px rgba(2,6,23,.28);'
+  function loadPrefs () { try { return JSON.parse(localStorage.getItem(PREFS_KEY) || '{}') } catch { return {} } }
+  function savePrefs (p) { try { localStorage.setItem(PREFS_KEY, JSON.stringify(p)) } catch {} }
+  function applyTheme (themeId) {
+    let eff = themeId || 'midnight'
+    const p = loadPrefs()
+    if (eff === 'system') eff = (window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches) ? 'light' : 'midnight'
+    if ((p.color_scheme === 'light') && LIGHT_VARIANTS[eff]) eff = LIGHT_VARIANTS[eff]
+    document.documentElement.setAttribute('data-theme', eff)
+    document.querySelectorAll('.vnso-tp-menu [role="option"]').forEach(function (li) {
+      li.setAttribute('aria-selected', li.dataset.theme === themeId ? 'true' : 'false')
+    })
+    var lbl = document.querySelector('.vnso-tp-label')
+    if (lbl) lbl.textContent = LABELS[themeId] || themeId
+    savePrefs(Object.assign({}, p, { theme: themeId }))
+  }
 
-  const mode = document.createElement('select')
-  mode.setAttribute('aria-label', 'Color mode')
-  mode.innerHTML =
-    '<option value="system">Auto</option><option value="dark">Dark</option><option value="light">Light</option>'
+  function mount () {
+    if (document.getElementById('vnso-theme-picker')) return
+    var prefs = loadPrefs()
+    var cur = prefs.theme || 'midnight'
+    var menuHtml = GROUPS.map(function (g) {
+      var sec = '<li class="vnso-tp-section" aria-hidden="true">' + g.label + '</li>'
+      var items = g.themes.map(function (id) {
+        var sw = id.replace(/[^a-z0-9]/g, '-')
+        var sel = cur === id ? ' aria-selected="true"' : ''
+        return '<li role="option" data-theme="' + id + '" tabindex="0"' + sel + '><span class="vnso-sw vnso-sw-' + sw + '" aria-hidden="true"></span>' + (LABELS[id] || id) + '</li>'
+      }).join('')
+      return sec + items
+    }).join('')
+    var host = document.createElement('div')
+    host.id = 'vnso-theme-picker'
+    host.className = 'vnso-theme-picker'
+    host.innerHTML = '<button type="button" class="vnso-tp-btn" aria-haspopup="listbox" aria-expanded="false" title="Chọn giao diện"><span class="vnso-tp-swatch" aria-hidden="true"></span><span class="vnso-tp-label">' + (LABELS[cur] || cur) + '</span><span class="vnso-tp-caret" aria-hidden="true">▾</span></button><ul class="vnso-tp-menu" role="listbox" hidden>' + menuHtml + '</ul>'
+    var btn = host.querySelector('.vnso-tp-btn')
+    var menu = host.querySelector('.vnso-tp-menu')
+    btn.addEventListener('click', function (e) { e.stopPropagation(); var o = menu.hidden; menu.hidden = !o; btn.setAttribute('aria-expanded', String(!o)) })
+    menu.addEventListener('click', function (e) { var li = e.target.closest('[role="option"]'); if (!li) return; e.stopPropagation(); applyTheme(li.dataset.theme); menu.hidden = true; btn.setAttribute('aria-expanded', 'false') })
+    document.addEventListener('click', function () { menu.hidden = true; btn.setAttribute('aria-expanded', 'false') })
+    document.body.appendChild(host)
+    applyTheme(cur)
+  }
 
-  const theme = document.createElement('select')
-  theme.setAttribute('aria-label', 'Theme family')
-  theme.innerHTML =
-    '<option value="anthropic">anthropic</option><option value="v0">v0</option><option value="github-dim">github</option><option value="midnight">midnight</option><option value="linear">linear</option><option value="stripe">stripe</option><option value="notion">notion</option><option value="figma">figma</option><option value="raycast">raycast</option><option value="supabase">supabase</option><option value="railway">railway</option><option value="light">light</option><option value="system">system</option>'
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', mount, { once: true })
+  else mount()
+})()
 
-  const controlStyle =
-    'height:32px;padding:0 10px;border-radius:8px;border:1px solid var(--border,rgba(148,163,184,.3));background:var(--card-bg,#0f172a);color:var(--text,#e2e8f0);font:600 12px/1.2 ui-sans-serif,system-ui,sans-serif;'
-  mode.style.cssText = controlStyle
-  theme.style.cssText = controlStyle
 
-  const prefs = typeof window.__getPrefs === 'function' ? window.__getPrefs() : {}
-  mode.value = (prefs && prefs.color_scheme) || 'system'
-  theme.value = (prefs && prefs.theme) || 'midnight'
-
-  mode.addEventListener('change', () => {
-    if (typeof window.__setColorScheme === 'function') window.__setColorScheme(mode.value)
-  })
-  theme.addEventListener('change', () => {
-    if (typeof window.__setTheme === 'function') window.__setTheme(theme.value)
-  })
-
-  host.append(mode, theme)
-  document.body.appendChild(host)
-}
-
-if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', mountSharedThemePicker, { once: true })
-} else {
-  mountSharedThemePicker()
-}
 
 vueApp.use(VueAxios, router)
 vueApp.use(pollJobPlugin)
