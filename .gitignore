@@ -109,3 +109,8 @@ waf-*
 #.*
 
 !.gitignore
+
+# VNSO runtime secrets. Keep .env.example tracked as the documented template.
+/.env
+/.env.*
+!/.env.example

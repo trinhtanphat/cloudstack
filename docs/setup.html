@@ -86,7 +86,7 @@
 <pre><code>cd /opt &amp;&amp; git clone https://github.com/trinhtanphat/cloudstack.git
 cd cloudstack &amp;&amp; cp docker-compose.prod.yml docker-compose.yml
 docker compose up -d
-# Tài khoản admin mặc định: admin / Admin@@3224@@ (đổi ngay sau lần đầu đăng nhập)
+# Tài khoản admin: lấy từ .env (CLOUDSTACK_ADMIN_USER / CLOUDSTACK_ADMIN_PASS)
 docker compose logs -f management | tail -200</code></pre>
     <p>Triển khai 3-server / 4-server: xem <a href="../THREE-SERVER-DEPLOYMENT-PLAN.md">THREE-SERVER-DEPLOYMENT-PLAN.md</a>
        và <a href="../DEPLOYMENT-RUNBOOK-4-SERVERS.md">DEPLOYMENT-RUNBOOK-4-SERVERS.md</a>.</p>
@@ -166,8 +166,8 @@ mount -t nfs storage.vnso.vn:/export/secondary /mnt/secondary
     <summary>9. Đăng nhập admin &amp; rotate API key</summary>
 <pre><code># Tài khoản mặc định
 URL:  https://manage.example.vn/client
-User: admin
-Pass: Admin@@3224@@   # đổi ngay sau lần đầu đăng nhập
+User: $CLOUDSTACK_ADMIN_USER
+Pass: $CLOUDSTACK_ADMIN_PASS
 
 # Rotate API key tự động
 bash scripts/vnso/rotate-admin-api-key.sh \

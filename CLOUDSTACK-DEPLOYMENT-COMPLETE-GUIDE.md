@@ -13,9 +13,9 @@ This guide combines UI infrastructure setup with advanced network bridge configu
 2. ✅ Create Zone: `zone-1` (Advanced, KVM, DNS 8.8.8.8/8.8.4.4)
 3. ✅ Create Pod: `pod-1` (Reserved IPs: 10.10.10.10-10.10.10.50)
 4. ✅ Create Cluster: `cluster-kvm-1` (KVM, CPU overcommit 2x, Memory 1x)
-5. ✅ Add Host 1: `103.9.159.151` (root / Admin@@3224@@)
-6. ✅ Add Host 2: `103.9.159.165` (root / Admin@@3224@@)
-7. ✅ Add Host 3: `103.9.159.188` (root / Admin@@3224@@)
+5. ✅ Add Host 1: `103.9.159.151` (root / <KVM_ROOT_PASSWORD_FROM_ENV>)
+6. ✅ Add Host 2: `103.9.159.165` (root / <KVM_ROOT_PASSWORD_FROM_ENV>)
+7. ✅ Add Host 3: `103.9.159.188` (root / <KVM_ROOT_PASSWORD_FROM_ENV>)
 
 **Validation:**
 ```bash
@@ -111,21 +111,21 @@ ansible-playbook -i inventory.ini playbooks/network-bridges.yml
 
 ```bash
 # Check br-mgmt bridge exists and has correct IP on each host:
-sshpass -p 'Admin@@3224@@' ssh -o StrictHostKeyChecking=no root@103.9.159.151 'ip addr show br-mgmt | grep "inet "'
+sshpass -p "$KVM_ROOT_PASSWORD" ssh -o StrictHostKeyChecking=no root@103.9.159.151 'ip addr show br-mgmt | grep "inet "'
 # Output: inet 10.10.10.21/24 brd ...
 
-sshpass -p 'Admin@@3224@@' ssh -o StrictHostKeyChecking=no root@103.9.159.165 'ip addr show br-mgmt | grep "inet "'
+sshpass -p "$KVM_ROOT_PASSWORD" ssh -o StrictHostKeyChecking=no root@103.9.159.165 'ip addr show br-mgmt | grep "inet "'
 # Output: inet 10.10.10.22/24 brd ...
 
-sshpass -p 'Admin@@3224@@' ssh -o StrictHostKeyChecking=no root@103.9.159.188 'ip addr show br-mgmt | grep "inet "'
+sshpass -p "$KVM_ROOT_PASSWORD" ssh -o StrictHostKeyChecking=no root@103.9.159.188 'ip addr show br-mgmt | grep "inet "'
 # Output: inet 10.10.10.23/24 brd ...
 
 # Check br-guest VLAN bridge:
-sshpass -p 'Admin@@3224@@' ssh -o StrictHostKeyChecking=no root@103.9.159.151 'ip link show | grep br-'
+sshpass -p "$KVM_ROOT_PASSWORD" ssh -o StrictHostKeyChecking=no root@103.9.159.151 'ip link show | grep br-'
 # Output should show: br-mgmt, br-guest, br-storage
 
 # Check VLAN tag numbers:
-sshpass -p 'Admin@@3224@@' ssh -o StrictHostKeyChecking=no root@103.9.159.151 'ip -d link show br-guest'
+sshpass -p "$KVM_ROOT_PASSWORD" ssh -o StrictHostKeyChecking=no root@103.9.159.151 'ip -d link show br-guest'
 # Output should show: vlan id 30
 ```
 
@@ -133,14 +133,14 @@ sshpass -p 'Admin@@3224@@' ssh -o StrictHostKeyChecking=no root@103.9.159.151 'i
 
 ```bash
 # Test ping between hosts on management bridge (should work):
-sshpass -p 'Admin@@3224@@' ssh -o StrictHostKeyChecking=no root@103.9.159.151 'ping -c1 10.10.10.22'
+sshpass -p "$KVM_ROOT_PASSWORD" ssh -o StrictHostKeyChecking=no root@103.9.159.151 'ping -c1 10.10.10.22'
 # Output: 1 packets transmitted, 1 received, 0% packet loss
 
-sshpass -p 'Admin@@3224@@' ssh -o StrictHostKeyChecking=no root@103.9.159.165 'ping -c1 10.10.10.23'
+sshpass -p "$KVM_ROOT_PASSWORD" ssh -o StrictHostKeyChecking=no root@103.9.159.165 'ping -c1 10.10.10.23'
 # Output: 1 packets transmitted, 1 received, 0% packet loss
 
 # Test guest bridge connectivity (VLAN 30):
-sshpass -p 'Admin@@3224@@' ssh -o StrictHostKeyChecking=no root@103.9.159.151 'ping -c1 -I br-guest 10.20.0.2'
+sshpass -p "$KVM_ROOT_PASSWORD" ssh -o StrictHostKeyChecking=no root@103.9.159.151 'ping -c1 -I br-guest 10.20.0.2'
 # Output: 1 packets transmitted, 1 received, 0% packet loss
 ```
 
@@ -167,13 +167,13 @@ curl -s "http://103.9.157.6:28080/client/api/?command=listHosts&response=json" |
 **Solution:**
 ```bash
 # On the affected host, check if management bridge has correct IP:
-sshpass -p 'Admin@@3224@@' ssh -o StrictHostKeyChecking=no root@103.9.159.151 'ip addr show br-mgmt'
+sshpass -p "$KVM_ROOT_PASSWORD" ssh -o StrictHostKeyChecking=no root@103.9.159.151 'ip addr show br-mgmt'
 
 # If IP is missing, apply netplan manually:
-sshpass -p 'Admin@@3224@@' ssh -o StrictHostKeyChecking=no root@103.9.159.151 'netplan apply && sleep 2 && ip addr show br-mgmt'
+sshpass -p "$KVM_ROOT_PASSWORD" ssh -o StrictHostKeyChecking=no root@103.9.159.151 'netplan apply && sleep 2 && ip addr show br-mgmt'
 
 # If still broken, revert to previous netplan:
-sshpass -p 'Admin@@3224@@' ssh -o StrictHostKeyChecking=no root@103.9.159.151 'ls /etc/netplan/backup/'
+sshpass -p "$KVM_ROOT_PASSWORD" ssh -o StrictHostKeyChecking=no root@103.9.159.151 'ls /etc/netplan/backup/'
 # Check backup files, restore if needed
 ```
 
@@ -182,7 +182,7 @@ sshpass -p 'Admin@@3224@@' ssh -o StrictHostKeyChecking=no root@103.9.159.151 'l
 **Check VLAN ID:**
 ```bash
 # Verify VLAN ID in bridge config:
-sshpass -p 'Admin@@3224@@' ssh -o StrictHostKeyChecking=no root@103.9.159.151 'ip -d link show | grep -A1 "br-guest"'
+sshpass -p "$KVM_ROOT_PASSWORD" ssh -o StrictHostKeyChecking=no root@103.9.159.151 'ip -d link show | grep -A1 "br-guest"'
 
 # Should show: vlan id 30
 # If shows "vlan id 0", VLAN not applying - check netplan template
@@ -195,13 +195,13 @@ sshpass -p 'Admin@@3224@@' ssh -o StrictHostKeyChecking=no root@103.9.159.151 'i
 **Solution:**
 ```bash
 # NFS mounts should hit br-storage VLAN 20:
-sshpass -p 'Admin@@3224@@' ssh -o StrictHostKeyChecking=no root@103.9.159.151 'mount | grep nfs'
+sshpass -p "$KVM_ROOT_PASSWORD" ssh -o StrictHostKeyChecking=no root@103.9.159.151 'mount | grep nfs'
 
 # If no NFS mounts, manually mount to test:
-sshpass -p 'Admin@@3224@@' ssh -o StrictHostKeyChecking=no root@103.9.159.151 'mount -t nfs 103.9.157.6:/export/secondary /mnt && ls /mnt && umount /mnt'
+sshpass -p "$KVM_ROOT_PASSWORD" ssh -o StrictHostKeyChecking=no root@103.9.159.151 'mount -t nfs 103.9.157.6:/export/secondary /mnt && ls /mnt && umount /mnt'
 
 # If mount fails, check br-storage IP exists:
-sshpass -p 'Admin@@3224@@' ssh -o StrictHostKeyChecking=no root@103.9.159.151 'ip addr show br-storage'
+sshpass -p "$KVM_ROOT_PASSWORD" ssh -o StrictHostKeyChecking=no root@103.9.159.151 'ip addr show br-storage'
 
 # Should show: inet 10.10.20.21/24 ...
 ```
@@ -255,7 +255,7 @@ sshpass -p 'Admin@@3224@@' ssh -o StrictHostKeyChecking=no root@103.9.159.151 'i
 **Manual rollback (if bridges cause issues):**
 ```bash
 # On each affected host, restore original netplan:
-sshpass -p 'Admin@@3224@@' ssh root@103.9.159.151 'cd /etc/netplan && ls -la'
+sshpass -p "$KVM_ROOT_PASSWORD" ssh root@103.9.159.151 'cd /etc/netplan && ls -la'
 # If backup exists, restore: cp 01-netcfg.yaml.bak 01-netcfg.yaml
 # Then apply: netplan apply
 ```

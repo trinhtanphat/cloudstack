@@ -105,7 +105,7 @@ deploy/ansible/
 
 2. **Verify bridges:**
    ```bash
-   sshpass -p 'Admin@@3224@@' ssh root@103.9.159.151 'ip link show | grep br-'
+   sshpass -p "$KVM_ROOT_PASSWORD" ssh root@103.9.159.151 'ip link show | grep br-'
    ```
 
 ✅ **Result:** VMs will be isolated on separate VLANs (20=storage, 30=guest)
@@ -161,7 +161,7 @@ deploy/ansible/
 | KVM Host 2 | 103.9.159.165 | 22 | Compute node 2 |
 | KVM Host 3 | 103.9.159.188 | 22 | Compute node 3 |
 
-**All SSH access:** root / Admin@@3224@@
+**All SSH access:** root / <KVM_ROOT_PASSWORD_FROM_ENV>
 
 ---
 
@@ -229,7 +229,7 @@ Total: 40-50 minutes for everything
 ### **Q: What if a host stays "Connecting"?**
 **A:** Check if libvirtd is running: 
 ```bash
-sshpass -p 'Admin@@3224@@' ssh root@<HOSTIP> 'systemctl is-active libvirtd'
+sshpass -p "$KVM_ROOT_PASSWORD" ssh root@<HOSTIP> 'systemctl is-active libvirtd'
 ```
 If not, see troubleshooting in START-HERE.md
 
@@ -267,7 +267,7 @@ After completing all steps, you should have:
 3. Check CloudStack event log for error messages
 4. Verify host connectivity:
    ```bash
-   ping 103.9.159.151 && sshpass -p 'Admin@@3224@@' ssh root@103.9.159.151 'uptime'
+   ping 103.9.159.151 && sshpass -p "$KVM_ROOT_PASSWORD" ssh root@103.9.159.151 'uptime'
    ```
 
 **When reporting issues, include:**
@@ -281,8 +281,8 @@ After completing all steps, you should have:
 ## 🔐 Security Notes
 
 **Default Credentials (Change in production):**
-- CloudStack UI: admin / password
-- SSH access: root / Admin@@3224@@
+- CloudStack UI: `$CLOUDSTACK_ADMIN_USER` / `$CLOUDSTACK_ADMIN_PASS`
+- SSH access: root / <KVM_ROOT_PASSWORD_FROM_ENV>
 
 **For production, you should:**
 - Change CloudStack admin password

@@ -116,16 +116,16 @@ Click cluster name → Look for **"Add Host"** button
 |-------|-------|
 | Host | `103.9.159.151` |
 | Username | `root` |
-| Password | `Admin@@3224@@` |
+| Password | `<KVM_ROOT_PASSWORD_FROM_ENV>` |
 | Tags | `kvm-compute-1` |
 
 Click **Next** → Auto-detects host (wait 10-30 seconds)
 
 Click **OK** → Status becomes **Up** (wait 30 seconds)
 
-**For Host 2:** Use `103.9.159.165` (root / Admin@@3224@@)
+**For Host 2:** Use `103.9.159.165` (root / <KVM_ROOT_PASSWORD_FROM_ENV>)
 
-**For Host 3:** Use `103.9.159.188` (root / Admin@@3224@@)
+**For Host 3:** Use `103.9.159.188` (root / <KVM_ROOT_PASSWORD_FROM_ENV>)
 
 ---
 
@@ -240,18 +240,18 @@ Storage (Separate)
 
 ```
 Management Host: 103.9.157.6
-  (SSH root / Admin@@3224@@)
+  (SSH root / <KVM_ROOT_PASSWORD_FROM_ENV>)
 
 KVM Host 1: 103.9.159.151
-  (SSH root / Admin@@3224@@)
+  (SSH root / <KVM_ROOT_PASSWORD_FROM_ENV>)
 
 KVM Host 2: 103.9.159.165
-  (SSH root / Admin@@3224@@)
+  (SSH root / <KVM_ROOT_PASSWORD_FROM_ENV>)
 
 KVM Host 3: 103.9.159.188
-  (SSH root / Admin@@3224@@)
+  (SSH root / <KVM_ROOT_PASSWORD_FROM_ENV>)
 
-CloudStack UI: admin / password
+CloudStack UI: $CLOUDSTACK_ADMIN_USER / $CLOUDSTACK_ADMIN_PASS
 ```
 
 ---
@@ -267,12 +267,12 @@ CloudStack UI: admin / password
 
 2. Check libvirtd is running:
    ```bash
-   sshpass -p 'Admin@@3224@@' ssh root@103.9.159.151 'systemctl is-active libvirtd'
+   sshpass -p "$KVM_ROOT_PASSWORD" ssh root@103.9.159.151 'systemctl is-active libvirtd'
    ```
 
 3. Check firewall allows CloudStack:
    ```bash
-   sshpass -p 'Admin@@3224@@' ssh root@103.9.159.151 'ufw status'
+   sshpass -p "$KVM_ROOT_PASSWORD" ssh root@103.9.159.151 'ufw status'
    ```
 
 4. See detailed troubleshooting in: `START-HERE.md` → Troubleshooting section

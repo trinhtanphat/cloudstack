@@ -108,7 +108,7 @@ This guide walks you through the CloudStack web interface to set up the infrastr
    |-------|-------|
    | Hostname | `103.9.159.151` |
    | Username | `root` |
-   | Password | `Admin@@3224@@` |
+   | Password | `<KVM_ROOT_PASSWORD_FROM_ENV>` |
    | Host Tags | `kvm-compute-1` |
 
 3. **Click "Next"** → CloudStack connects and discovers the host
@@ -130,7 +130,7 @@ This guide walks you through the CloudStack web interface to set up the infrastr
 |-------|-------|
 | Hostname | `103.9.159.165` |
 | Username | `root` |
-| Password | `Admin@@3224@@` |
+| Password | `<KVM_ROOT_PASSWORD_FROM_ENV>` |
 | Host Tags | `kvm-compute-2` |
 
 ---
@@ -143,7 +143,7 @@ This guide walks you through the CloudStack web interface to set up the infrastr
 |-------|-------|
 | Hostname | `103.9.159.188` |
 | Username | `root` |
-| Password | `Admin@@3224@@` |
+| Password | `<KVM_ROOT_PASSWORD_FROM_ENV>` |
 | Host Tags | `kvm-compute-3` |
 
 **After all 3 hosts added:**
@@ -236,11 +236,11 @@ This guide walks you through the CloudStack web interface to set up the infrastr
 **Solution:**
 ```bash
 # On each KVM host, verify:
-sshpass -p 'Admin@@3224@@' ssh root@<HOST_IP> 'systemctl is-active libvirtd'
+sshpass -p "$KVM_ROOT_PASSWORD" ssh root@<HOST_IP> 'systemctl is-active libvirtd'
 # Should return: active
 
 # Check firewall allows CloudStack:
-sshpass -p 'Admin@@3224@@' ssh root@<HOST_IP> 'ufw status | grep 16514'
+sshpass -p "$KVM_ROOT_PASSWORD" ssh root@<HOST_IP> 'ufw status | grep 16514'
 # Should see 16514 rule (libvirt monitoring)
 ```
 
@@ -254,7 +254,7 @@ ssh root@103.9.157.6 'mkdir -p /export/primary && chown nobody:nogroup /export/p
 ssh root@103.9.157.6 'echo "/export/primary 10.10.0.0/16(rw,no_root_squash,sync)" >> /etc/exports && exportfs -ra'
 
 # Test from each KVM host:
-sshpass -p 'Admin@@3224@@' ssh root@103.9.159.151 'mount -t nfs 103.9.157.6:/export/primary /mnt && umount /mnt && echo "NFS works"'
+sshpass -p "$KVM_ROOT_PASSWORD" ssh root@103.9.159.151 'mount -t nfs 103.9.157.6:/export/primary /mnt && umount /mnt && echo "NFS works"'
 ```
 
 ### Issue: Zone/Pod/Cluster show "Disabled"

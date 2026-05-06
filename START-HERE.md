@@ -43,14 +43,14 @@ This file contains **exact step-by-step instructions** for every CloudStack UI s
 |---------|-------|
 | **CloudStack URL** | `http://103.9.157.6:28080/client/` |
 | **Default Username** | `admin` |
-| **Default Password** | `password` (or as configured during initial setup) |
+| **Admin Password** | `$CLOUDSTACK_ADMIN_PASS` from `.env` / secret store |
 | **Zone Name** | `zone-1` |
 | **Pod Name** | `pod-1` |
 | **Cluster Name** | `cluster-kvm-1` |
 | **Cluster Type** | `KVM` |
-| **Host 1 IP** | `103.9.159.151` (user: `root`, pass: `Admin@@3224@@`) |
-| **Host 2 IP** | `103.9.159.165` (user: `root`, pass: `Admin@@3224@@`) |
-| **Host 3 IP** | `103.9.159.188` (user: `root`, pass: `Admin@@3224@@`) |
+| **Host 1 IP** | `103.9.159.151` (user: `root`, pass: `<KVM_ROOT_PASSWORD_FROM_ENV>`) |
+| **Host 2 IP** | `103.9.159.165` (user: `root`, pass: `<KVM_ROOT_PASSWORD_FROM_ENV>`) |
+| **Host 3 IP** | `103.9.159.188` (user: `root`, pass: `<KVM_ROOT_PASSWORD_FROM_ENV>`) |
 | **Primary Storage** | `NFS 103.9.157.6:/export/primary` |
 | **Secondary Storage** | `NFS 103.9.157.6:/export/secondary` |
 
@@ -84,7 +84,7 @@ source .venv/bin/activate
 ansible-playbook -i inventory.ini playbooks/network-bridges.yml
 
 # 3. Verify bridges created
-sshpass -p 'Admin@@3224@@' ssh root@103.9.159.151 'ip link show | grep br-'
+sshpass -p "$KVM_ROOT_PASSWORD" ssh root@103.9.159.151 'ip link show | grep br-'
 ```
 
 ---
@@ -94,7 +94,7 @@ sshpass -p 'Admin@@3224@@' ssh root@103.9.159.151 'ip link show | grep br-'
 ### **Step 1: Open CloudStack Web Interface**
 
 1. Open browser, navigate to: `http://103.9.157.6:28080/client/`
-2. Login with: `admin` / `password`
+2. Login with `$CLOUDSTACK_ADMIN_USER` / `$CLOUDSTACK_ADMIN_PASS` from `.env`
 3. Wait for dashboard to load (may take 10-15 seconds)
 
 ### **Step 2: Create Zone (Advanced)**
@@ -137,7 +137,7 @@ sshpass -p 'Admin@@3224@@' ssh root@103.9.159.151 'ip link show | grep br-'
 3. Fill in:
    - **Host:** `103.9.159.151`
    - **Username:** `root`
-   - **Password:** `Admin@@3224@@`
+   - **Password:** `<KVM_ROOT_PASSWORD_FROM_ENV>`
 4. Click **Next**
 5. Should detect: `Hypervisor: KVM`, `Memory: ~64GB`, `CPUs: N cores`
 6. Click **OK** (status will show **Up** after 30-60 seconds)
@@ -145,8 +145,8 @@ sshpass -p 'Admin@@3224@@' ssh root@103.9.159.151 'ip link show | grep br-'
 ### **Step 6: Add Host 2 & 3**
 
 Repeat Step 5 for:
-- `103.9.159.165` (root / Admin@@3224@@)
-- `103.9.159.188` (root / Admin@@3224@@)
+- `103.9.159.165` (root / <KVM_ROOT_PASSWORD_FROM_ENV>)
+- `103.9.159.188` (root / <KVM_ROOT_PASSWORD_FROM_ENV>)
 
 **Wait for all 3 hosts to show "Up" status** (check by refreshing page)
 
@@ -217,10 +217,10 @@ Go to **Dashboard** and verify:
 **Fix:**
 ```bash
 # Check libvirtd is running on the problematic host:
-sshpass -p 'Admin@@3224@@' ssh root@<HOST_IP> 'systemctl is-active libvirtd'
+sshpass -p "$KVM_ROOT_PASSWORD" ssh root@<HOST_IP> 'systemctl is-active libvirtd'
 
 # If inactive, start it:
-sshpass -p 'Admin@@3224@@' ssh root@<HOST_IP> 'systemctl start libvirtd'
+sshpass -p "$KVM_ROOT_PASSWORD" ssh root@<HOST_IP> 'systemctl start libvirtd'
 ```
 
 ### **Storage shows "Connecting" or "Down"**
@@ -230,10 +230,10 @@ sshpass -p 'Admin@@3224@@' ssh root@<HOST_IP> 'systemctl start libvirtd'
 **Fix (on each KVM host):**
 ```bash
 # Test NFS mount:
-sshpass -p 'Admin@@3224@@' ssh root@<HOST_IP> 'mount -t nfs 103.9.157.6:/export/primary /mnt && ls /mnt && umount /mnt'
+sshpass -p "$KVM_ROOT_PASSWORD" ssh root@<HOST_IP> 'mount -t nfs 103.9.157.6:/export/primary /mnt && ls /mnt && umount /mnt'
 
 # If fails, check firewall:
-sshpass -p 'Admin@@3224@@' ssh root@103.9.157.6 'ufw status | grep 111'
+sshpass -p "$KVM_ROOT_PASSWORD" ssh root@103.9.157.6 'ufw status | grep 111'
 ```
 
 ### **Cluster shows "Disabled"**
